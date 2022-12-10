@@ -7,8 +7,8 @@ const BASE_URL = 'https://api.farcaster.xyz/v1'
 const SEARCHCASTER_URL = 'http://api.farcaster.xyz/'
 const db = getDB()
 
+//TODO: Store apps
 const getCastsOfUser = async (username: string) => {
-	return await axios.get('http: ');
 }
 
 const getUserByAddress = async (profile: string): Promise<User> => {
