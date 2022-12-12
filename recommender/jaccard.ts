@@ -1,8 +1,10 @@
 import { getDB } from "../utils" 
-import { Follow } from "../types"
+import { EthAddress, Follow } from "../types"
 import { intersection, union } from "./utils"
 
 const db = getDB()
+
+type AdjacencyMap = Record<EthAddress, Set<EthAddress>>
 
 /**
  * Here's a basic heuristic approach for suggesting users using the jaccard similarity.
@@ -13,7 +15,7 @@ const db = getDB()
 */
 
 const getGraphFromUsersTable = async () => {
-	const adjacencyMap: Record<string, Set<string>> = {}
+	const adjacencyMap: AdjacencyMap = {}
 	const follows = await db('follows').select('follower', 'followee')
 	const edges = follows.map(({follower, followee}: Follow) => [follower, followee])
 
@@ -25,10 +27,10 @@ const getGraphFromUsersTable = async () => {
 	return adjacencyMap
 }
 
-const calculateSimilarities = (adjacencyMap: any, root: string) => {
+const calculateSimilarities = (adjacencyMap: AdjacencyMap, root: EthAddress) => {
 	const rootNeighbors = adjacencyMap[root]
 
-	const similarity: Record<string, number> = {}
+	const similarity: Record<EthAddress, number> = {}
 	for (const node in adjacencyMap) {
 		const neighbors = adjacencyMap[node]
 
@@ -39,7 +41,7 @@ const calculateSimilarities = (adjacencyMap: any, root: string) => {
 
 	return similarity
 }
-const getSuggestedUsers = async (root: string, limit = 10) => {
+const getSuggestedUsers = async (root: EthAddress, limit = 10) => {
 	const adjacencyMap = await getGraphFromUsersTable()
 	const similarities = Object.entries(calculateSimilarities(adjacencyMap, root))
 
