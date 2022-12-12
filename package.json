@@ -9,8 +9,12 @@
     "better-sqlite3": "^8.0.1",
     "bignumber.js": "^9.1.1",
     "csv-writer": "^1.6.0",
+    "humps": "^2.0.1",
     "knex": "^2.3.0",
     "pg": "^8.8.0",
     "web3": "^1.8.1"
+  },
+  "devDependencies": {
+    "@types/humps": "^2.0.2"
   }
 }
