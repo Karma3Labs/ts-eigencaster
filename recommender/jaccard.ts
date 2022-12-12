@@ -1,10 +1,9 @@
 import { getDB } from "../utils" 
-import { EthAddress, Follow } from "../types"
+import { EthAddress, AdjacencyMap, Follow } from "../types"
 import { intersection, union } from "./utils"
 
 const db = getDB()
 
-type AdjacencyMap = Record<EthAddress, Set<EthAddress>>
 
 /**
  * Here's a basic heuristic approach for suggesting users using the jaccard similarity.

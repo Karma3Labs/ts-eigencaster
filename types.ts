@@ -1,4 +1,5 @@
 export type EthAddress = string
+export type AdjacencyMap = Record<EthAddress, Set<EthAddress>>
 
 export interface Follow {
 	follower: string,
