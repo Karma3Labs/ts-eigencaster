@@ -1,4 +1,3 @@
-import axios from 'axios'
 import { saveUsers, saveFollows, saveCasts } from './db';
 import { getUsers, getFollows, getCasts } from './fetch'
 import { getDB } from '../utils'; 

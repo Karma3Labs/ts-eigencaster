@@ -1,5 +1,5 @@
 import { Knex } from 'knex';
-import { Follow, EthAddress } from '../types'
+import { Follow } from '../types'
 
 export const saveFollows = async (db: Knex, follows: Follow[]) => {
 	if (follows.length == 0)  {
