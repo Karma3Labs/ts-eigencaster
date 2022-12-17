@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express'
-import recommend from '../recommender/jaccard'
+import recommend from '../recommender/eigentrust'
 import { getUsers } from './db'
 import { utils } from 'ethers'
 const { isAddress } = utils
@@ -12,10 +12,10 @@ app.get('/suggest_profiles', async (req: Request, res: Response) => {
 		res.status(400).send('Invalid address') ;
 		return
 	}
-	console.log('suggesting for', req.query.address)
+	console.log('Suggesting for', req.query.address)
 
 	const suggestions = await recommend(req.query.address as string)
-	const users = await getUsers(suggestions.map(s => s[0]));
+	const users = await getUsers(suggestions.map((s: any) => s[0]));
 	res.send(users)
 })
 

@@ -1,5 +1,5 @@
-import { EthAddress, AdjacencyMap, Follow } from "../types"
-import { getGraphFromUsersTable, intersection, union } from "./utils"
+import { EthAddress, AdjacencyMap } from "../../types"
+import { getGraphFromUsersTable, intersection, union } from "../utils"
 
 /**
  * Here's a basic heuristic approach for suggesting users using the jaccard similarity.
@@ -7,6 +7,7 @@ import { getGraphFromUsersTable, intersection, union } from "./utils"
  *  is to a given "root" user, and then returns a list of suggested users
  *  (skipping the already followed ones) sorted by their Jaccard similarity with
  *  the root user.
+ *  Test on : 0x8552042F2423E8596e08129855d47D3b1EEa8f03
 */
 
 const calculateSimilarities = (adjacencyMap: AdjacencyMap, root: EthAddress) => {
@@ -23,7 +24,8 @@ const calculateSimilarities = (adjacencyMap: AdjacencyMap, root: EthAddress) => 
 
 	return similarity
 }
-const getSuggestedUsers = async (root: EthAddress, limit = 10) => {
+
+export default async (root: EthAddress, limit = 10) => {
 	const adjacencyMap = await getGraphFromUsersTable()
 	const similarities = Object.entries(calculateSimilarities(adjacencyMap, root))
 
@@ -33,8 +35,4 @@ const getSuggestedUsers = async (root: EthAddress, limit = 10) => {
 	const suggestions = similarities.filter(s => !adjacencyMap[root].has(s[0])) 
 	// Skip first user that is going to be root (since jaccard similarity = 1)
 	return suggestions.slice(1, limit)
-}
-
-export default async (address: EthAddress) => {
-	return getSuggestedUsers(address)
 }
