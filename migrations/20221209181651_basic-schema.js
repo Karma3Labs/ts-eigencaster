@@ -22,7 +22,7 @@ exports.up = function (knex) {
 	}).createTableIfNotExists('follows', function (table) {
 		table.string('follower');
 		table.string('followee');
-		table.index(['follower', 'followee'])
+		table.unique(['follower', 'followee'])
 	})
 };
 
