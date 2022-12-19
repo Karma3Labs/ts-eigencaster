@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "migrate": "npx knex migrate:up",
+    "serve": "node dist/server/index.js"
+  },
   "dependencies": {
     "@types/lodash": "^4.14.191",
     "axios": "1.1.3",
