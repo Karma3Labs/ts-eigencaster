@@ -1,16 +1,18 @@
+import  path from 'path'
 import axios from "axios";
 import { EthAddress } from "../types"
 import { getFollowersOfAddress, getAllFollows, objectFlip } from "./utils"
 
-type Pretrust = { i: number, v: number }[]
-type LocalTrust =  {i: number, j: number, v: number }[]
-type Entry = [string, number]
+// TODO: Fix that ugly thingie
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') })
 
-const EIGENTRUST_API = 'http://localhost:8161/basic/v1/compute'
+type Pretrust = { i: number, v: number }[]
+type LocalTrust =  { i: number, j: number, v: number }[]
+type Entry = [ string, number ]
 
 const askEigentrustAPI = async (usersCount: number, localTrust: LocalTrust, pretrust: Pretrust) => {
-	console.time('Calculation duration')
-	const res = await axios.post(EIGENTRUST_API, {
+	const eigentrustAPI = `${process.env.EIGENTRUST_API}/basic/v1/compute`
+	const res = await axios.post(eigentrustAPI, {
 		localTrust: {
 			scheme: 'inline',
 			size: usersCount,

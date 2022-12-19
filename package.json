@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp .env dist/",
     "migrate": "npx knex migrate:up",
     "scrape": "node dist/scraper/index.js",
     "serve": "node dist/server/index.js"
