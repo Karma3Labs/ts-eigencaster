@@ -25,17 +25,24 @@ exports.up = function (knex) {
 		table.unique(['follower', 'followee'])
 	}).createTableIfNotExists('casts', function (table) {
 		table.integer('sequence');
-		table.string('type');
-		table.string('publisher');
+		table.string('address');
+		table.string('username');
+		table.string('display_name');
+		table.string('avatar_url');
+		table.boolean('avatar_verified')
 		table.string('text', 5000).nullable();
+		table.string('reply_parent_merkle_root').nullable();
+		table.string('merkle_root');
+		table.string('thread_merkle_root');
+		table.string('reply_parent_username');
+		table.integer('num_reply_children').nullable();
 		table.integer('reactions').nullable();
 		table.integer('recasts').nullable();
 		table.integer('watches').nullable();
 		table.specificType('mentions', 'text ARRAY').nullable();
-		table.integer('reply_to').nullable();
-		table.json('metrics');
 		table.datetime('published_at');
 		table.foreign('publisher');
+		table.unique('merkle_root')
 	})
 };
 

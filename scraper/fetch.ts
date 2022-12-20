@@ -37,15 +37,22 @@ export const getCasts = async (offset: number, limit: number): Promise<Cast[]> =
 	const casts: Cast[] = res.data.feed.results.map((r: Record<string, any>) => {
 		return {
 			sequence: r.sequence,
-			type: r.type,	
-			publisher: r.address,
+			address: r.address,
+			username: r.username,
 			text: r.text,
+			displayName: r.display_name,
+			publishedAt: r.published_at,
+			avatarUrl: r.avatar_url,
+			avatarVerified: r.avatar_verified,
+			replyParentMerkleRoot: r.reply_parent_merkle_root,
+			numReplyChildren: r.num_reply_children,
+			replyParentUsername: r.reply_parent_username,
+			merkleRoot: r.merkle_root,
+			threadMerkleRoot: r.thread_merkle_root,
 			reactions: r.reactions || 0,
 			recasts: r.recasts || 0,
 			watches: r.watches || 0,
-			mentions: (r.mentions || []).map((t: any) => t.address),
-			replyTo: r?.reply_to_data?.sequence || null,
-			metrics: r.custom_metrics.custom_cast_metrics
+			mentions: r.mentions || [],
 		} as Cast
 	})
 

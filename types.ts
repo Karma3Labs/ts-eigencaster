@@ -25,14 +25,21 @@ export interface User {
 } 
 
 export interface Cast {
-	sequence: number,
-	type: string,	
-	publisher: string,
-	text: string,
-	mentions: any[]
-	reactions: number
-	recasts: number
-	watches: number
-	replyTo: number
-	metrics: object
+		sequence: number,
+		address: string,
+		username: string,
+		text: string,
+		displayName: string,
+		publishedAt: string,
+		avatarUrl: string,
+		avatarVerified: boolean,
+		replyParentMerkleRoot: string,
+		numReplyChildren: number,
+		replyParentUsername: string,
+		merkleRoot: string,
+		threadMerkleRoot: string,
+		reactions: number,
+		recasts: number,
+		watches: number,
+		mentions: any[] | null,
 }

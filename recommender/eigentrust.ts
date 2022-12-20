@@ -11,6 +11,7 @@ type LocalTrust =  { i: number, j: number, v: number }[]
 type Entry = [ string, number ]
 
 const askEigentrustAPI = async (usersCount: number, localTrust: LocalTrust, pretrust: Pretrust) => {
+	console.time('Calculation duration')
 	const eigentrustAPI = `${process.env.EIGENTRUST_API}/basic/v1/compute`
 	const res = await axios.post(eigentrustAPI, {
 		localTrust: {
@@ -25,6 +26,7 @@ const askEigentrustAPI = async (usersCount: number, localTrust: LocalTrust, pret
 		}
 	})
 	console.timeEnd('Calculation duration')
+	console.log(res.data)
 
 	return res.data.entries
 }
