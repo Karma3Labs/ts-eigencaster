@@ -1,6 +1,6 @@
 import  path from 'path'
-import axios from "axios";
-import { EthAddress } from "../types"
+import axios from "axios"
+import { EthAddress, Follow } from "../types"
 import { getFollowersOfAddress, getAllFollows, objectFlip } from "./utils"
 
 // TODO: Fix that ugly thingie
@@ -26,21 +26,27 @@ const askEigentrustAPI = async (usersCount: number, localTrust: LocalTrust, pret
 		}
 	})
 	console.timeEnd('Calculation duration')
-	console.log(res.data)
 
 	return res.data.entries
 }
 
-export default async (address: EthAddress, limit = 10) => {
-	const follows = await getAllFollows()
+function getUsersFromFollows(follows: Follow[]): EthAddress[] {
+	// It seems that the users table doesn't contain all of the users in the follows table
+	// That's why I construct the graph from the follows table
 	const addresses = new Set()
 	for (const { follower, followee } of follows) {
 		addresses.add(follower)
 		addresses.add(followee)
 	}
-	const idsToAddresses = Array.from(addresses)
-	const addressesToIds = objectFlip(idsToAddresses as Record<number, string>)
-	console.log(`Fetched ${addresses.size} users`)
+
+	return Array.from(addresses) as EthAddress[]
+}
+
+export default async (address: EthAddress, limit = 10) => {
+	const follows = await getAllFollows()
+	const idsToAddresses = getUsersFromFollows(follows)
+	const addressesToIds = objectFlip(idsToAddresses)
+	console.log(`Fetched ${idsToAddresses.length} users`)
 
 	const localTrust: LocalTrust = []
 	for (const { follower, followee } of follows) {
@@ -52,24 +58,23 @@ export default async (address: EthAddress, limit = 10) => {
 	}
 	console.log(`Generated localtrust with ${localTrust.length} entries`)
 
-	const pretrust: Pretrust = [];
+	const pretrust: Pretrust = []
 	const followers = await getFollowersOfAddress(address)
-	const followersSet = new Set(followers)
-	for (const { followee } of followers) {
+	followers.forEach((follower) => {
 		pretrust.push({
-			i: +addressesToIds[followee],
-			v: 1 / followers.length
+			i: +addressesToIds[follower],
+			v: 1 / followers.size
 		})
-	}
+	})
 	console.log(`Generated pretrust with ${pretrust.length} entries`)
 
-	const res = await askEigentrustAPI(addresses.size, localTrust, pretrust)
+	const res = await askEigentrustAPI(idsToAddresses.length, localTrust, pretrust)
 	const globalTrust = res.map((entry: any) => [idsToAddresses[entry.i], entry.v])
 
 	// Desc sort by similarity
 	globalTrust.sort((a: Entry, b: Entry)  => b[1] - a[1]) 
 	// Remove users that address already follows
-	const suggestions = globalTrust.filter((s: Entry) => !followersSet.has(s[0])) 
+	const suggestions = globalTrust.filter((s: Entry) => !followers.has(s[0])) 
 
 	return suggestions.slice(0, limit)
 }

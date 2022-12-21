@@ -1,6 +1,6 @@
-import { saveUsers, saveFollows, saveCasts } from './db';
+import { saveUsers, saveFollows, saveCasts } from './db'
 import { getUsers, getFollows, getCasts } from './fetch'
-import { getDB } from '../utils'; 
+import { getDB } from '../utils'
 
 const BATCH_SIZE = 100
 const db = getDB()
@@ -14,7 +14,7 @@ const scrapeUsers = async () => {
 		await saveUsers(db, users)
 		offset += BATCH_SIZE
 	}
-	while (users.length == BATCH_SIZE);
+	while (users.length == BATCH_SIZE)
 }
 
 const scrapeFollows = async () => {
@@ -29,7 +29,7 @@ const scrapeFollows = async () => {
 		}
 		offset += BATCH_SIZE
 	}
-	while (users.length == BATCH_SIZE);
+	while (users.length == BATCH_SIZE)
 }
 
 const scrapeCasts = async () => {
@@ -41,7 +41,7 @@ const scrapeCasts = async () => {
 		await saveCasts(db, casts)
 		offset += BATCH_SIZE
 	}
-	while (casts.length == BATCH_SIZE);
+	while (casts.length == BATCH_SIZE)
 }
 
 const main = async () => {
