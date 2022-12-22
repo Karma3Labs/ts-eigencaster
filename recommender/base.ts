@@ -39,7 +39,7 @@ export default class Recommender {
 		const suggestions = globalTrustEntries.filter((s: Entry) => !followers.has(s[0])) 
 
 		//TODO: Pagination
-		return suggestions.map(([address]) => address).slice(limit)
+		return suggestions.map(([address]) => address).slice(0, limit)
 	}
 
 	/**

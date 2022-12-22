@@ -18,6 +18,7 @@ export default (recommender: Recommender) => {
 		console.log('Suggesting for', req.query.address)
 
 		const suggestions = await recommender.recommend(req.query.address as string)
+		console.log('suge', suggestions.length)
 		const users = await getUsers(suggestions)
 		res.send(users)
 	})
