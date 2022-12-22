@@ -1,6 +1,11 @@
 export type EthAddress = string
 export type AdjacencyMap = Record<EthAddress, Set<EthAddress>>
 
+export type Pretrust<T> = { i: T, v: number }[]
+export type GlobalTrust<T> = { i: T, v: number }[]
+export type LocalTrust<T> =  { i: T, j: T, v: EthAddress | number }[]
+export type Entry = [ string, number ]
+
 export interface Follow {
 	follower: EthAddress,
 	followee: EthAddress
