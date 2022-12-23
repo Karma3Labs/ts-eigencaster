@@ -66,7 +66,16 @@ export default class Recommender {
 	 * Basic pretrust calculation. Just pre-trust all users the same.
 	*/
 	async calculatePretrust(address: EthAddress, users: EthAddress[], follows: Follow[]): Promise<Pretrust<EthAddress>> {
-		return [] as Pretrust<EthAddress>
+		const pretrust: Pretrust<EthAddress> = []
+		const followers = await getFollowersOfAddress(address)
+		followers.forEach((follower) => {
+			pretrust.push({
+				i: follower,
+				v: 1 / followers.size
+			})
+		})
+
+		return pretrust
 	}
 
 	/**
