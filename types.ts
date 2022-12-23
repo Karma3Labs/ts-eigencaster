@@ -27,6 +27,7 @@ export interface User {
 	registeredAt: Date
 	updatedAt: Date
 	customMetrics: object
+	isFollowed?: boolean
 } 
 
 export interface Cast {

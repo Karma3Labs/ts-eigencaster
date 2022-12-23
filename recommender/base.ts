@@ -46,7 +46,10 @@ export default class Recommender {
 	async recommendUsers(address: EthAddress, limit = 20) {
 		const suggestions = await this.recommend(address, 100)
 		return db('users')
-			.select()
+			.select(
+				'*', 
+				db.raw(`(select exists (select 1 from follows where followee = ? and follower = address)) as is_followed`, address)
+			)
 			.whereIn('address', suggestions)
 			.limit(limit)
 	}
