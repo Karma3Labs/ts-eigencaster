@@ -35,12 +35,8 @@ export default class Recommender {
 		const globalTrustEntries: Entry[] = globalTrust.map((entry: GlobalTrust<EthAddress>[0]) => [entry.i, entry.v])
 		globalTrustEntries.sort((a: Entry, b: Entry)  => b[1] - a[1]) 
 
-		// Remove users that address already follows
-		const followers = await getFollowersOfAddress(address)
-		const suggestions = globalTrustEntries.filter((s: Entry) => !followers.has(s[0])) 
-
 		//TODO: Pagination
-		return suggestions.map(([address]) => address).slice(0, limit)
+		return globalTrustEntries.map(([address]) => address).slice(0, limit)
 	}
 
 	async recommendUsers(address: EthAddress, limit = 20) {
