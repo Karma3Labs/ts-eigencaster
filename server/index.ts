@@ -1,6 +1,8 @@
 import express, { Request, Response } from 'express'
 import { utils } from 'ethers'
 import Recommender from '../recommender/base'
+import { getAddress, userExists } from './db'
+import { getAddressFromQueryParams } from './utils'
 
 const { isAddress } = utils
 
@@ -9,25 +11,35 @@ const PORT = 8080
 
 export default (recommender: Recommender) => {
 	app.get('/suggest_profiles', async (req: Request, res: Response) => {
-		if (!req.query.address || !isAddress(req.query.address as string)) {
-			res.status(400).send('Invalid address') 
-			return
-		}
-		console.log('Suggesting users for', req.query.address)
+		try {
+			const address = await getAddressFromQueryParams(req.query)
+			console.log('Suggesting profiles for', address)
 
-		const users = await recommender.recommendUsers(req.query.address as string)
-		res.send(users)
+			const users = await recommender.recommendUsers(address)
+			res.send(users)
+		}
+		catch (e: unknown) {
+			if (e instanceof Error) {
+				console.log(`[SERVER] ${e.message} for input:`, req.query)
+				return res.status(400).send(e.message) //TODO: Parameterize HTTP codes
+			}
+		}
 	})
 
 	app.get('/suggest_casts', async (req: Request, res: Response) => {
-		if (!req.query.address || !isAddress(req.query.address as string)) {
-			res.status(400).send('Invalid address') 
-			return
-		}
-		console.log('Suggesting casts for', req.query.address)
+		try {
+			const address = await getAddressFromQueryParams(req.query)
+			console.log('Suggesting profiles for', address)
 
-		const casts = await recommender.recommendCasts(req.query.address as string)
-		res.send(casts)
+			const casts = await recommender.recommendCasts(address)
+			res.send(casts)
+		}
+		catch (e: unknown) {
+			if (e instanceof Error) {
+				console.log(`[SERVER] ${e.message} for input:`, req.query)
+				return res.status(400).send(e.message) //TODO: Parameterize HTTP codes
+			}
+		}
 	})
 
 	app.listen(PORT, async () => {
