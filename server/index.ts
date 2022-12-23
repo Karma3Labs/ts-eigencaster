@@ -15,7 +15,7 @@ export default (recommender: Recommender) => {
 			const address = await getAddressFromQueryParams(req.query)
 			console.log('Suggesting profiles for', address)
 
-			const users = await recommender.recommendUsers(address)
+			const users = await recommender.recommendUsers(address, 100)
 			res.send(users)
 		}
 		catch (e: unknown) {
