@@ -110,7 +110,8 @@ export default class Recommender {
 					scheme: 'inline',
 					size: this.addresses.length,
 					entries: pretrust,
-				}
+				},
+				alpha: 0.9
 			})
 
 			console.timeLog('calculation')
