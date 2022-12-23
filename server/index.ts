@@ -1,6 +1,4 @@
-import yargs from 'yargs'
 import express, { Request, Response } from 'express'
-import { getUsers, db } from './db'
 import { utils } from 'ethers'
 import Recommender from '../recommender/base'
 
@@ -15,17 +13,20 @@ export default (recommender: Recommender) => {
 			res.status(400).send('Invalid address') 
 			return
 		}
-		console.log('Suggesting for', req.query.address)
+		console.log('Suggesting users for', req.query.address)
 
-		const suggestions = await recommender.recommend(req.query.address as string)
-		console.log('suge', suggestions.length)
-		const users = await getUsers(suggestions)
+		const users = await recommender.recommendUsers(req.query.address as string)
 		res.send(users)
 	})
 
-	//TODO: Implement this endpoint
 	app.get('/suggest_casts', async (req: Request, res: Response) => {
-		const casts = await db('casts').select().limit(10)
+		if (!req.query.address || !isAddress(req.query.address as string)) {
+			res.status(400).send('Invalid address') 
+			return
+		}
+		console.log('Suggesting casts for', req.query.address)
+
+		const casts = await recommender.recommendCasts(req.query.address as string)
 		res.send(casts)
 	})
 

@@ -30,7 +30,6 @@ const main = async () => {
   const RecommenderClass = (await import(filename)).default
   const recommender = new RecommenderClass() as Recommender
 
-
   serve(recommender)
 }
 

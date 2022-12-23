@@ -3,6 +3,7 @@ import axios from "axios"
 import { EthAddress, Follow } from "../types"
 import { Pretrust, LocalTrust, GlobalTrust, Entry } from '../types'
 import { getFollowersOfAddress, getAllFollows, objectFlip } from "./utils"
+import { db } from '../server/db'
 
 // TODO: Fix that ugly thingie
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') })
@@ -20,7 +21,7 @@ export default class Recommender {
 		console.log(`Loaded ${this.addresses.length} users and ${this.follows.length} follows`)
 	}
 
-	async recommend(address: EthAddress, limit = 10) {
+	async recommend(address: EthAddress, limit = 20) {
 		const localtrust = await this.calculateLocalTrust(this.addresses, this.follows)
 		const pretrust = await this.calculatePretrust(address, this.addresses, this.follows)
 
@@ -40,6 +41,26 @@ export default class Recommender {
 
 		//TODO: Pagination
 		return suggestions.map(([address]) => address).slice(0, limit)
+	}
+
+	async recommendUsers(address: EthAddress, limit = 20) {
+		const suggestions = await this.recommend(address, 100)
+		return db('users')
+			.select()
+			.whereIn('address', suggestions)
+			.limit(limit)
+	}
+
+	async recommendCasts(address: EthAddress, limit = 20) {
+		const suggestions = await this.recommend(address, 100)
+
+		return db('casts').select(
+			'*',
+			db.raw('0.2 * reactions + 0.3 * recasts + 0.5 * watches as popularity')
+		)
+		.whereIn('address', suggestions)
+		.orderBy('popularity', 'desc')
+		.limit(limit)
 	}
 
 	/**
