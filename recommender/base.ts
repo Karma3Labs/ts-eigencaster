@@ -32,7 +32,6 @@ export default class Recommender {
 		)
 		const globalTrust = this.convertGlobalTrustToAddresses(res);
 
-
 		const globalTrustEntries: Entry[] = globalTrust.map((entry: GlobalTrust<EthAddress>[0]) => [entry.i, entry.v])
 		globalTrustEntries.sort((a: Entry, b: Entry)  => b[1] - a[1]) 
 
@@ -45,7 +44,8 @@ export default class Recommender {
 		return db('users')
 			.select(
 				'*', 
-				db.raw(`(select exists (select 1 from follows where followee = ? and follower = address)) as is_followed`, address)
+				db.raw(`(select exists (select 1 from follows where followee = ? and follower = address)) as you_follow`, address),
+				db.raw(`(select exists (select 1 from follows where followee = address and follower = ?)) as follows_you`, address)
 			)
 			.whereIn('address', suggestions)
 			.limit(limit)
