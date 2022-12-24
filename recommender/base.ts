@@ -1,9 +1,10 @@
 import  path from 'path'
 import axios from "axios"
-import { EthAddress, Follow } from "../types"
+import { Cast, EthAddress, Follow } from "../types"
 import { Pretrust, LocalTrust, GlobalTrust, Entry } from '../types'
 import { getFollowersOfAddress, getAllFollows, objectFlip } from "./utils"
 import { db } from '../server/db'
+import { add } from 'lodash'
 
 // TODO: Fix that ugly thingie
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') })
@@ -50,16 +51,30 @@ export default class Recommender {
 			.limit(limit)
 	}
 
-	async recommendCasts(address: EthAddress, limit = 20) {
-		const suggestions = await this.recommend(address, 100)
+	async recommendCasts(root: EthAddress, limit = 20) {
+		const suggestions = await this.recommend(root, 50)
 
-		return db('casts').select(
-			'*',
+		const popularityScores = await db('casts').select(
+			'sequence',
 			db.raw('0.2 * reactions + 0.3 * recasts + 0.5 * watches as popularity')
 		)
 		.whereIn('address', suggestions)
-		.orderBy('popularity', 'desc')
-		.limit(limit)
+
+		const scores: any = []
+		for (const { sequence, popularity } of popularityScores) {
+			const score =  popularity * 
+			 ((suggestions.length - suggestions.indexOf(sequence)) / suggestions.length)
+
+			scores[sequence] = score
+		}
+		const scoresEntries = Object.entries(scores)
+		scoresEntries.sort((a: any, b: any) => b[1] - a[1])
+
+		const sequences = scoresEntries.map(x => x[0]).slice(0, limit)
+		const casts = await db('casts').select().whereIn('sequence', sequences)
+		casts.sort((a: Cast, b: Cast) => scores[b.sequence] - scores[a.sequence])
+
+		return casts
 	}
 
 	/**
