@@ -3,7 +3,7 @@
  * @returns { Promise<void> }
  */
 exports.up = function (knex) {
-	return knex.schema.createTableIfNotExists('users', function (table) {
+	return knex.schema.createTableIfNotExists('profiles', function (table) {
 		table.integer('fid').unique();
 		table.string('address').unique();
 		table.string('username');
@@ -20,9 +20,10 @@ exports.up = function (knex) {
 		table.datetime('updated_at');
 		table.json('custom_metrics');
 	}).createTableIfNotExists('follows', function (table) {
-		table.string('follower');
-		table.string('followee');
-		table.unique(['follower', 'followee'])
+		table.string('follower_fid');
+		table.string('following_fid');
+		table.dateTime('created_at');
+		table.unique(['follower_fid', 'following_fid'])
 	}).createTableIfNotExists('casts', function (table) {
 		table.integer('sequence');
 		table.string('address');
@@ -51,5 +52,5 @@ exports.up = function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = function (knex) {
-	return knex.schema.dropTable('casts').dropTable('follows').dropTable('users');
+	return knex.schema.dropTable('casts').dropTable('follows').dropTable('profiles');
 };

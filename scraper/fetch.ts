@@ -1,14 +1,14 @@
 import axios from 'axios'
-import { Cast, EthAddress, User } from '../types'
+import { Cast, Follow, Profile } from '../types'
 
 /**
- * Fetch users from discove.xyz
+ * Fetch profiles from discove.xyz
 */
-export const getUsers = async (offset: number, limit: number): Promise<User[]> => {
+export const getProfiles = async (offset: number, limit: number): Promise<Profile[]> => {
 	const res = await queryDiscove(`select * from profiles order by registered_at limit ${limit} offset ${offset}`)
-	const users: User[] = res.data.feed.results.map((r: Record<string, any>) => {
+	const profiles: Profile[] = res.data.feed.results.map((r: Record<string, any>) => {
 		return {
-			fid: r.id,
+			fid: r.fid,
 			address: r.address,
 			username: r.username,
 			displayName: r.display_name,
@@ -26,7 +26,7 @@ export const getUsers = async (offset: number, limit: number): Promise<User[]> =
 		}
 	})
 
-	return users
+	return profiles
 }
 
 /**
@@ -59,20 +59,18 @@ export const getCasts = async (offset: number, limit: number): Promise<Cast[]> =
 	return casts
 }
 
-/**
- * Fetch follows from api.farcaster.xyz
-*/
+export const getFollows = async (offset: number, limit: number): Promise<Follow[]> => {
+	const res = await queryDiscove(`select * from following limit ${limit} offset ${offset}`)
+	const casts = res.data.feed.results.map((r: Record<string, any>) => {
+		return {
+			followerFid: r.follower_fid,
+			followingFid: r.following_fid,
+			createdAt: new Date(r.created_at)
+		} as Follow
+	})
 
-// export const getFollows = async (fid: number): Promise<Follow[]> => {
-// 	const res = client.fetchUserFollowers({ fid })
-// 	const follows: Follow[] = []
-
-// 	for await (const t of res) {
-// 		follows.push({ followee: fid, follower: t.fid })
-// 	}
-
-// 	return follows
-// }
+	return casts
+}
 
 export const queryFarcaster = async (endpoint: string) => {
 	const BASE_URL = 'https://api.farcaster.xyz/v1'
@@ -84,21 +82,4 @@ export const queryDiscove = async (sql: string) => {
 	const BASE_URL = 'https://www.discove.xyz/api/feeds'
 	const res = await axios.get(`${BASE_URL}?sql=${sql}`)
 	return res
-}
-
-export const getFollows = async (user: EthAddress): Promise<any[]> => {
-	try {
-	const res = await queryFarcaster(`/following/${user}`)
-	const follows = res.map((f: Record<string, any>) => {
-		return { 
-			follower: user,
-			followee: f.address
-		}
-	})
-	return follows
-	}
-	catch (e){
-		console.log(e)
-		return []
-	}
 }

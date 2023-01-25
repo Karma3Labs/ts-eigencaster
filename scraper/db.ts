@@ -1,5 +1,5 @@
 import { Knex } from 'knex';
-import { Cast, Follow, User } from '../types'
+import { Cast, Follow, Profile } from '../types'
 
 export const saveFollows = async (db: Knex, follows: Follow[]) => {
 	if (follows.length == 0)  {
@@ -12,13 +12,13 @@ export const saveFollows = async (db: Knex, follows: Follow[]) => {
 		.ignore()
 }
 
-export const saveUsers = async (db: Knex, users: User[]) => {
-	if (users.length == 0)  {
+export const saveProfiles = async (db: Knex, profiles: Profile[]) => {
+	if (profiles.length == 0)  {
 		return
 	}
 
-	await db("users")
-		.insert(users)
+	await db("profiles")
+		.insert(profiles)
 		.onConflict()
 		.ignore();
 }
