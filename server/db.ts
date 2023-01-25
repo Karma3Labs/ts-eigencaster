@@ -3,21 +3,21 @@ import { getDB } from "../utils";
 
 export const db = getDB()
 
-export const getUsers = (users: EthAddress[]) => {
-	return db('users').select().whereIn('address', users)
+export const getFidByAddress = async (address: EthAddress): Promise<number> => {
+	const record = await db('profiles')
+		.where({ address })
+		.first('fid')
+
+	return record?.fid 
 }
 
-export const getCasts = (sequences: number[]) => {
-	return db('users').select().whereIn('sequence', sequences)
-}
-
-export const userExists = async (address: string) => {
-	const [{ count }] = await db('users').where({ address }).count()
+export const profileExists = async (fid: number) => {
+	const [{ count }] = await db('profiles').where({ fid }).count()
 	return +count >= 1
 }
 
-export const getAddress = async (username: string): Promise<string> => {
-	const record = await db('users')
+export const getFidByUsername = async (username: string): Promise<number> => {
+	const record = await db('profiles')
 		.where({ username })
 		.first('address')
 

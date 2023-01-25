@@ -1,30 +1,38 @@
-import { isAddress } from "ethers/lib/utils"
-import { getAddress, userExists } from "./db"
+import { getFidByAddress, getFidByUsername, profileExists  } from "./db"
 
-export const getAddressFromQueryParams = async (query: Record<string, any>): Promise<string> => {
-	let address: string
-	if (query.address) {
-		address = query.address as string
-
-		if (!isAddress(address)) {
-			throw new Error('Invalid address') 
+export const getFidFromQueryParams = async (query: Record<string, any>): Promise<number> => {
+	if (query.fid) {
+		if (isNaN(query.fid)) {
+			throw new Error('Invalid fid') 
 		}
-
-		if (!(await userExists(address))) {
+		if (!(await profileExists(query.fid))) {
 			throw new Error('User does not exist')
 		}
-	}
-	else if (query.username) {
-		const stripped = (query.username as string).trim() 
-		address = await getAddress(stripped)
 
-		if (!address) {
+		return +query.fid
+	}
+
+	if (query.address) {
+		const stripped = (query.username as string).trim() 
+		const fid = await getFidByAddress(stripped)
+
+		if (!fid) {
 			throw new Error('Username does not exist')
 		}
-	}
-	else {
-		throw new Error('Either address or username should be provided')
+
+		return fid
 	}
 
-	return address
+	if (query.username) {
+		const stripped = (query.username as string).trim() 
+		const fid = await getFidByUsername(stripped)
+
+		if (!fid) {
+			throw new Error('Username does not exist')
+		}
+
+		return fid
+	}
+
+	throw new Error('Either address or username should be provided')
 }

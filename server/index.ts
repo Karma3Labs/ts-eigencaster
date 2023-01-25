@@ -1,22 +1,21 @@
-import express, { Request, Response } from 'express'
 import { utils } from 'ethers'
-import Recommender from '../recommender/base'
-import { getAddress, userExists } from './db'
-import { getAddressFromQueryParams } from './utils'
-
-const { isAddress } = utils
+import express, { Request, Response } from 'express'
+import Recommender from '../recommender'
+import { getFidFromQueryParams } from './utils'
+import { LocaltrustStrategy } from '../recommender/strategies/localtrust'
+import { PretrustStrategy } from '../recommender/strategies/pretrust'
 
 const app = express()
 const PORT = 8080
 
-export default (recommender: Recommender) => {
+export default (recommender: Recommender, pretrustStrategy: PretrustStrategy, localtrustStrategy: LocaltrustStrategy) => {
 	app.get('/suggest_profiles', async (req: Request, res: Response) => {
 		try {
-			const address = await getAddressFromQueryParams(req.query)
-			console.log('Suggesting profiles for', address)
+			const fid = await getFidFromQueryParams(req.query)
+			console.log('Suggesting profiles for fid:', fid)
 
-			const users = await recommender.recommendUsers(address, 100)
-			res.send(users)
+			const profiles = await recommender.recommendProfiles(fid, 100)
+			res.send(profiles)
 		}
 		catch (e: unknown) {
 			if (e instanceof Error) {
@@ -28,10 +27,10 @@ export default (recommender: Recommender) => {
 
 	app.get('/suggest_casts', async (req: Request, res: Response) => {
 		try {
-			const address = await getAddressFromQueryParams(req.query)
-			console.log('Suggesting profiles for', address)
+			const fid = await getFidFromQueryParams(req.query)
+			console.log('Suggesting profiles for fid:', fid)
 
-			const casts = await recommender.recommendCasts(address, 100)
+			const casts = await recommender.recommendCasts(fid, 100)
 			res.send(casts)
 		}
 		catch (e: unknown) {
@@ -44,7 +43,7 @@ export default (recommender: Recommender) => {
 
 	app.listen(PORT, async () => {
 		recommender = new Recommender()
-		await recommender.init()
+		await recommender.init(pretrustStrategy, localtrustStrategy)
 
 		console.log(`Magic is happening on port: ${PORT}`)
 	})

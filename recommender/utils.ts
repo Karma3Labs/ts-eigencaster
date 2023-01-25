@@ -1,19 +1,6 @@
 import { AdjacencyMap, EthAddress, Follow }  from '../types'
 import { getDB } from "../utils" 
 
-export const getGraphFromUsersTable = async () => {
-	const adjacencyMap: AdjacencyMap = {}
-	const follows = await getAllFollows()
-	const edges = follows.map(({follower, followee}: Follow) => [follower, followee])
-
-	for (const [src, dest] of edges) {
-		adjacencyMap[src] = adjacencyMap[src] || new Set()
-		adjacencyMap[src].add(dest)
-	}
-
-	return adjacencyMap
-}
-
 export const getAllFollows = async (): Promise<Follow[]> => {
 	const db = getDB()
 	return db('follows')
@@ -23,13 +10,13 @@ export const getAllFollows = async (): Promise<Follow[]> => {
 export const getFollowersOfAddress = async (address: EthAddress): Promise<Set<EthAddress>> => {
 	const db = getDB()
 	const follows = await db('follows')
-		.where('followee', address)
+		.where('following', address)
 		.select()
 
-	return new Set(follows.map((f: Follow) => f.follower))
+	return new Set(follows.map((f: Follow) => f.followerFid))
 }
 
-export const objectFlip = (obj: Record<number, string>): Record<string, number> => {
+export const objectFlip = (obj: Record<number, number>): Record<number, number> => {
 	const ret: Record<string, number> = {}
 	Object.keys(obj).forEach(key => {
 	  //@ts-expect-error
