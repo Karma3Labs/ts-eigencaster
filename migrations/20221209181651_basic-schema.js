@@ -20,8 +20,8 @@ exports.up = function (knex) {
 		table.datetime('updated_at');
 		table.json('custom_metrics');
 	}).createTableIfNotExists('follows', function (table) {
-		table.string('follower_fid');
-		table.string('following_fid');
+		table.integer('follower_fid');
+		table.integer('following_fid');
 		table.dateTime('created_at');
 		table.unique(['follower_fid', 'following_fid'])
 	}).createTableIfNotExists('casts', function (table) {

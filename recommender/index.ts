@@ -6,6 +6,7 @@ import { getAllFollows, objectFlip } from "./utils"
 import { PretrustPicker, PretrustStrategy, strategies as pretrustStrategies } from './strategies/pretrust'
 import { LocaltrustStrategy, strategies as localStrategies } from './strategies/localtrust'
 import { db } from '../server/db'
+import { Knex } from 'knex'
 
 // TODO: Fix that ugly thingie
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') })
@@ -50,16 +51,43 @@ export default class Recommender {
 		return globalTrustEntries.map(([fid]) => fid).slice(0, limit)
 	}
 
-	async recommendProfiles(fid: number, limit = 20) {
-		const suggestions = await this.recommend(fid, 100)
-		return db('profiles')
-			.select(
-				'*', 
-				db.raw(`(select exists (select 1 from follows where follower_fid = ? and following_fid = address)) as you_follow`, fid),
-				db.raw(`(select exists (select 1 from follows where follower_fid = address and following_fid = ?)) as follows_you`, fid)
-			)
-			.whereIn('fid', suggestions)
-			.limit(limit)
+	
+	async recommendProfiles(fid: number, limit = 20, includeFollowing: boolean = true) {
+		const suggestions = await this.recommend(fid)
+		const result: any[] = []
+
+		await db.transaction(async (trx: Knex.Transaction) => {
+			await this.populateRecommendationsTable(trx, suggestions)
+			result.splice(0, 0, ...await trx
+				.select(
+					'profiles.*',
+					'recommendations.rank',
+					db.raw('follows_you.follower_fid NOTNULL as follows_you'),
+					db.raw('you_follow.following_fid NOTNULL as you_follow'),
+				)
+				.from('profiles')
+				.join('recommendations', 'profiles.fid', 'recommendations.fid')
+				.leftJoin('follows AS you_follow', function () {
+					this
+						.on('you_follow.follower_fid', '=', 'profiles.fid')
+						.andOn('you_follow.following_fid', '=', db.raw('?', +fid))
+				})
+				.leftJoin('follows AS follows_you', function () {
+					this
+						.on('follows_you.following_fid', '=', 'profiles.fid')
+						.andOn('follows_you.follower_fid', '=', db.raw('?', +fid))
+				})
+				.where(function () {
+					this.where('profiles.fid', '!=', db.raw('?', +fid))
+					if (!includeFollowing) {
+						this.whereNull('you_follow')
+					}
+				})
+				.orderBy('rank')
+				.limit(limit))
+			await trx.commit()
+		})
+		return result
 	}
 
 	async recommendCasts(root: number, limit = 20) {
@@ -67,9 +95,11 @@ export default class Recommender {
 
 		const popularityScores = await db('casts').select(
 			'sequence',
-			db.raw('0.2 * reactions + 0.3 * recasts + 0.5 * watches as popularity')
+			'profiles.fid as fid',
+			db.raw('0.2 * reactions + 0.3 * recasts + 0.5 * watches as popularity'),
 		)
-		.whereIn('address', suggestions)
+		.join('profiles', 'profiles.address', 'casts.address')
+		.whereIn('fid', suggestions)
 
 		const scores: any = []
 		for (const { sequence, popularity } of popularityScores) {
@@ -88,29 +118,22 @@ export default class Recommender {
 		return casts
 	}
 
-	/**
-	 * Basic pretrust calculation. Just pre-trust all users the same.
-	*/
-	async calculatePretrust(follows: Follow[]): Promise<Pretrust<number>> {
-		const pretrust: Pretrust<number> = []
-		return pretrust
-	}
+	async populateRecommendationsTable(trx: Knex.Transaction<any, any[]>, suggestions: any[]) {
+		// Raw because Knex doesn't support temporary tables
+		await trx.schema.raw(`
+				CREATE TEMPORARY TABLE recommendations (
+					rank integer PRIMARY KEY,
+					fid integer NOT NULL UNIQUE  -- implies an index
+				)
+				ON COMMIT DROP
+			`)
 
-	/**
-	 * Generates basic localtrust by transforming all existing connections
-	*/
-	async calculateLocaltrust(follows: Follow[]): Promise<LocalTrust<number>> {
-		const localTrust: LocalTrust<number> = []
-		for (const { followingFid, followerFid } of follows) {
-			localTrust.push({
-				i: followerFid,
-				j: followingFid,
-				v: 1
-			})
+		let values = []
+		for (const [index, fid] of suggestions.entries()) {
+			console.log(fid)
+			values.push({rank: index, fid: +fid })
 		}
-
-		console.log(`Generated localtrust with ${localTrust.length} entries`)
-		return localTrust
+		await trx.insert(values).into('recommendations')
 	}
 
 	private runEigentrust = async (fid?: number): Promise<GlobalTrust<number>> => {
@@ -168,27 +191,7 @@ export default class Recommender {
 	}
 
 	/**
-	 * Generate a list of follows given all connections 
-	 */
-	private async getAllFollows(): Promise<number[]> {
-		const profiles = await db('profiles')
-			.select('fid')
-
-		return profiles.map(({ followerFid, followingFid }: Follow) => [followerFid, followingFid])
-	}
-
-	private getGraphFromUsersTable = async () => {
-		const adjacencyMap: AdjacencyMap = {}
-
-		for (const { followerFid, followingFid } of this.follows) {
-			adjacencyMap[followerFid] = adjacencyMap[followerFid] || new Set()
-			adjacencyMap[followerFid].add(followingFid)
-		}
-
-		return adjacencyMap
-	}
-	/**
-	 * Address to number conversions
+	 * FId to index conversions
 	*/
 
 	private convertLocaltrustToIds(localTrust: LocalTrust<number>): LocalTrust<number> {
@@ -219,3 +222,4 @@ export default class Recommender {
 		})
 	}
 }
+

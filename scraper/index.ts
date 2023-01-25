@@ -42,8 +42,8 @@ const scrapeCasts = async () => {
 }
 
 const main = async () => {
-	await scrapeProfiles()
-	await scrapeFollows()
+	// await scrapeProfiles()
+	// await scrapeFollows()
 	await scrapeCasts()
 }
 
