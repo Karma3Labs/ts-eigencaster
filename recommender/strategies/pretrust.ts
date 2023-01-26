@@ -1,5 +1,5 @@
 import { db } from '../../server/db';
-import { Follow, Pretrust } from '../../types'
+import { Follow, Pretrust, Profile } from '../../types'
 
 export type PretrustPicker = (fid?: number) => Promise<Pretrust<number>>
 export type PretrustStrategy = {picker: PretrustPicker, personalized: boolean}
@@ -38,9 +38,28 @@ const pretrustFollowsOfFid: PretrustPicker = async (fid?: number) => {
 	return pretrust
 }
 
+const pretrustFirst20Profiles: PretrustPicker = async () => {
+	const pretrust: Pretrust<number> = []
+	const profiles = await db('profiles')
+		.select('fid', 'registered_at')
+		.orderBy('registered_at', 'asc')
+		.limit(20)
+
+	profiles.forEach((profile: Profile) => {
+		pretrust.push({
+			i: profile.fid,
+			v: 1 / profiles.length
+		})
+	})
+
+	return pretrust
+}
+
+
 
 export const strategies: Record<string, PretrustStrategy> = {
 	pretrustAllEqually: { picker: pretrustAllEqually, personalized: false },
 	pretrustSpecificFids: { picker: pretrustSpecificFids, personalized: false },
 	pretrustFollowsOfFid: { picker: pretrustFollowsOfFid, personalized: true },
+	pretrustFirst20Profiles: { picker: pretrustFirst20Profiles, personalized: false }
 }
