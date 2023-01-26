@@ -14,7 +14,7 @@ export default (recommender: Recommender, pretrustStrategy: PretrustStrategy, lo
 			const fid = await getFidFromQueryParams(req.query)
 			console.log('Suggesting profiles for fid:', fid)
 
-			const profiles = await recommender.recommendProfiles(fid, 100)
+			const profiles = await recommender.recommendProfiles(fid, 100, req.query.includeFollowing == 'on' || false)
 			res.send(profiles)
 		}
 		catch (e: unknown) {
