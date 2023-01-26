@@ -45,7 +45,6 @@ export default class Recommender {
 		}
 		const globalTrustEntries: Entry[] = this.globaltrust.map((entry: GlobalTrust<number>[0]) => [entry.i, entry.v])
 		globalTrustEntries.sort((a: Entry, b: Entry)  => b[1] - a[1]) 
-		console.log('Global trust', JSON.stringify(globalTrustEntries))
 
 		//TODO: Pagination
 		return globalTrustEntries.map(([fid]) => fid).slice(0, limit)
@@ -94,26 +93,25 @@ export default class Recommender {
 		const suggestions = await this.recommend(root, 50)
 
 		const popularityScores = await db('casts').select(
-			'sequence',
-			'profiles.fid as fid',
+			'hash',
+			'author_fid',
 			db.raw('0.2 * reactions + 0.3 * recasts + 0.5 * watches as popularity'),
 		)
-		.join('profiles', 'profiles.address', 'casts.address')
-		.whereIn('fid', suggestions)
+		.whereIn('author_fid', suggestions)
 
 		const scores: any = []
-		for (const { sequence, popularity } of popularityScores) {
+		for (const { hash, popularity } of popularityScores) {
 			const score =  popularity * 
-			 ((suggestions.length - suggestions.indexOf(sequence)) / suggestions.length)
+			 ((suggestions.length - suggestions.indexOf(hash)) / suggestions.length)
 
-			scores[sequence] = score
+			scores[hash] = score
 		}
 		const scoresEntries = Object.entries(scores)
 		scoresEntries.sort((a: any, b: any) => b[1] - a[1])
 
-		const sequences = scoresEntries.map(x => x[0]).slice(0, limit)
-		const casts = await db('casts').select().whereIn('sequence', sequences)
-		casts.sort((a: Cast, b: Cast) => scores[b.sequence] - scores[a.sequence])
+		const hashes  = scoresEntries.map(x => x[0]).slice(0, limit)
+		const casts = await db('casts').select().whereIn('hash', hashes)
+		casts.sort((a: Cast, b: Cast) => scores[b.hash] - scores[a.hash])
 
 		return casts
 	}
@@ -130,7 +128,6 @@ export default class Recommender {
 
 		let values = []
 		for (const [index, fid] of suggestions.entries()) {
-			console.log(fid)
 			values.push({rank: index, fid: +fid })
 		}
 		await trx.insert(values).into('recommendations')

@@ -33,7 +33,9 @@ export interface Profile {
 }
 
 export interface Cast {
-	sequence: number,
+	hash: string,
+	threadHash: string,
+	authorFid: number,
 	address: string,
 	username: string,
 	text: string,
@@ -41,11 +43,8 @@ export interface Cast {
 	publishedAt: string,
 	avatarUrl: string,
 	avatarVerified: boolean,
-	replyParentMerkleRoot: string,
-	numReplyChildren: number,
+	replyToData: any,
 	replyParentUsername: string,
-	merkleRoot: string,
-	threadMerkleRoot: string,
 	reactions: number,
 	recasts: number,
 	watches: number,

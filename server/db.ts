@@ -19,7 +19,7 @@ export const profileExists = async (fid: number) => {
 export const getFidByUsername = async (username: string): Promise<number> => {
 	const record = await db('profiles')
 		.where({ username })
-		.first('address')
+		.first('fid')
 
-	return record?.address 
+	return record?.fid 
 }

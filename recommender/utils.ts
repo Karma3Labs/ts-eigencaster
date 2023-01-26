@@ -1,4 +1,4 @@
-import { AdjacencyMap, EthAddress, Follow }  from '../types'
+import { EthAddress, Follow }  from '../types'
 import { getDB } from "../utils" 
 
 export const getAllFollows = async (): Promise<Follow[]> => {

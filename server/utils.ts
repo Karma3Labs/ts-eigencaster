@@ -13,7 +13,7 @@ export const getFidFromQueryParams = async (query: Record<string, any>): Promise
 	}
 
 	if (query.address) {
-		const stripped = (query.username as string).trim() 
+		const stripped = (query.address as string).trim() 
 		const fid = await getFidByAddress(stripped)
 
 		if (!fid) {
