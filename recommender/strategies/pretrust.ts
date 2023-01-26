@@ -1,16 +1,16 @@
 import { db } from '../../server/db';
 import { Follow, Pretrust, Profile } from '../../types'
 
-export type PretrustPicker = (fid?: number) => Promise<Pretrust<number>>
+export type PretrustPicker = (fid?: number) => Promise<Pretrust>
 export type PretrustStrategy = {picker: PretrustPicker, personalized: boolean}
 
 const pretrustAllEqually: PretrustPicker = async () => {
-	return [] as Pretrust<number>
+	return [] as Pretrust
 }
 
 const pretrustSpecificFids: PretrustPicker = async () => {
 	const pretrustedFids = [1, 2]
-	const pretrust: Pretrust<number> = []
+	const pretrust: Pretrust = []
 
 	pretrustedFids.forEach((fid) => {
 		pretrust.push({
@@ -23,7 +23,7 @@ const pretrustSpecificFids: PretrustPicker = async () => {
 }
 
 const pretrustFollowsOfFid: PretrustPicker = async (fid?: number) => {
-	const pretrust: Pretrust<number> = []
+	const pretrust: Pretrust = []
 	const follows = await db('follows')
 		.where('followerFid', fid)
 		.select()
@@ -39,7 +39,7 @@ const pretrustFollowsOfFid: PretrustPicker = async (fid?: number) => {
 }
 
 const pretrustFirst20Profiles: PretrustPicker = async () => {
-	const pretrust: Pretrust<number> = []
+	const pretrust: Pretrust = []
 	const profiles = await db('profiles')
 		.select('fid', 'registered_at')
 		.orderBy('registered_at', 'asc')

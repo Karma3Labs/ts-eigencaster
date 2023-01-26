@@ -20,7 +20,7 @@ export default class Recommender {
 	public pretrustPicker: PretrustPicker = pretrustStrategies.pretrustAllEqually.picker
 	public personalized = pretrustStrategies.pretrustAllEqually.personalized
 
-	public globaltrust: GlobalTrust<number> = []
+	public globaltrust: GlobalTrust = []
 
 	async init(pretrustPicker: PretrustStrategy, localtrustPicker = localStrategies.follows) {
 		this.fids = await this.getAllProfiles()
@@ -43,7 +43,7 @@ export default class Recommender {
 		if (this.personalized) {
 			this.globaltrust = await this.runEigentrust(fid)
 		}
-		const globalTrustEntries: Entry[] = this.globaltrust.map((entry: GlobalTrust<number>[0]) => [entry.i, entry.v])
+		const globalTrustEntries: Entry[] = this.globaltrust.map((entry: GlobalTrust[0]) => [entry.i, entry.v])
 		globalTrustEntries.sort((a: Entry, b: Entry)  => b[1] - a[1]) 
 
 		//TODO: Pagination
@@ -133,7 +133,7 @@ export default class Recommender {
 		await trx.insert(values).into('recommendations')
 	}
 
-	private runEigentrust = async (fid?: number): Promise<GlobalTrust<number>> => {
+	private runEigentrust = async (fid?: number): Promise<GlobalTrust> => {
 		const pretrust = await this.pretrustPicker(fid)
 		const convertedPretrust = this.convertPretrustToIds(pretrust)
 		console.log(`Generated pretrust with ${pretrust.length} entries`)
@@ -151,7 +151,7 @@ export default class Recommender {
 	}
 
 
-	async requestEigentrust(localTrust: LocalTrust<number>, pretrust: Pretrust<number>) {
+	async requestEigentrust(localTrust: LocalTrust, pretrust: Pretrust) {
 		try {
 			console.time('calculation')
 
@@ -191,7 +191,7 @@ export default class Recommender {
 	 * FId to index conversions
 	*/
 
-	private convertLocaltrustToIds(localTrust: LocalTrust<number>): LocalTrust<number> {
+	private convertLocaltrustToIds(localTrust: LocalTrust): LocalTrust {
 		return localTrust.map(({ i, j, v }) => {
 			return {
 				i: +this.fidsToIds[i],
@@ -201,7 +201,7 @@ export default class Recommender {
 		}) 
 	}
 	
-	private convertPretrustToIds(preTrust: Pretrust<number>): Pretrust<number> {
+	private convertPretrustToIds(preTrust: Pretrust): Pretrust {
 		return preTrust.map(({ i, v }) => {
 			return {
 				i: +this.fidsToIds[i],
@@ -210,7 +210,7 @@ export default class Recommender {
 		}) 
 	}
 
-	private convertGlobaltrustToFids(globalTrust: GlobalTrust<number>): GlobalTrust<number> {
+	private convertGlobaltrustToFids(globalTrust: GlobalTrust): GlobalTrust {
 		return globalTrust.map(({ i, v }) => {
 			return {
 				i: this.fids[i], 
