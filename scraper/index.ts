@@ -54,9 +54,9 @@ const scrapeLikes = async () => {
 }
 
 const main = async () => {
-	// await scrapeProfiles()
-	// await scrapeFollows()
-	// await scrapeCasts()
+	await scrapeProfiles()
+	await scrapeFollows()
+	await scrapeCasts()
 	await scrapeLikes()
 }
 
