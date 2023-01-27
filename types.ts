@@ -12,6 +12,13 @@ export interface Follow {
 	createdAt: Date
 }
 
+export interface Like {
+	type: string,
+	fid: number,
+	castHash: string,
+	createdAt: Date
+}
+
 export interface Profile {
 	fid: number
 	address: string

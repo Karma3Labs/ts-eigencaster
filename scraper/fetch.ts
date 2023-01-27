@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { Cast, Follow, Profile } from '../types'
+import { Cast, Follow, Like, Profile } from '../types'
 
 /**
  * Fetch profiles from discove.xyz
@@ -69,6 +69,22 @@ export const getFollows = async (offset: number, limit: number): Promise<Follow[
 
 	return casts
 }
+
+export const getLikes = async (offset: number, limit: number): Promise<Follow[]> => {
+	const res = await queryDiscove(`select * from likes limit ${limit} offset ${offset}`)
+	const casts = res.data.feed.results.map((r: Record<string, any>) => {
+		return {
+			type: r.type,
+			fid: r.fid,
+			castHash: r.cast_hash,
+			createdAt: r.created_at
+		} as Like
+	})
+
+	return casts
+}
+
+
 
 export const queryFarcaster = async (endpoint: string) => {
 	const BASE_URL = 'https://api.farcaster.xyz/v1'
