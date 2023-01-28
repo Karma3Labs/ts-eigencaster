@@ -51,9 +51,13 @@ export interface Cast {
 	avatarUrl: string,
 	avatarVerified: boolean,
 	replyToData: any,
-	replyParentUsername: string,
+	replyParentHash: number,
+	replyParentFid: number,
 	reactions: number,
 	recasts: number,
 	watches: number,
 	mentions: any[] | null,
+	recasters: any[] | null
+	recastedCastHash: string
+	isRecast: boolean
 }

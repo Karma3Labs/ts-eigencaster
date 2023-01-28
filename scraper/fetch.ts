@@ -38,7 +38,8 @@ export const getCasts = async (offset: number, limit: number): Promise<Cast[]> =
 		return {
 			hash: r.hash,
 			threadHash: r.thread_hash,
-			replyParentUsername: r.reply_parent_username,
+			replyParentFid: r.reply_parent_fid,
+			replyParentHash: r.reply_parent_hash,
 			authorFid: r.author_fid,
 			username: r.username,
 			text: r.text,
@@ -50,7 +51,10 @@ export const getCasts = async (offset: number, limit: number): Promise<Cast[]> =
 			reactions: r.reactions || 0,
 			recasts: r.recasts || 0,
 			watches: r.watches || 0,
-			mentions: r.mentions || [],
+			mentions: r.mentions,
+			recasters: r.recasters,
+			recastedCastHash: r.recasted_cast_hash,
+			isRecast: r.is_recast,
 		} as Cast
 	})
 

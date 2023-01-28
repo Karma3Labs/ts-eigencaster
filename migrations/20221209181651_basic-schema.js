@@ -30,13 +30,17 @@ exports.up = function (knex) {
 		table.integer('author_fid');
 		table.string('username');
 		table.string('text', 5000).nullable();
-		table.string('reply_parent_username').nullable();
+		table.string('reply_parent_fid').nullable();
+		table.string('reply_parent_hash').nullable();
 		table.string('display_name');
 		table.datetime('published_at');
 		table.string('avatar_url');
 		table.boolean('avatar_verified')
 		table.json('reply_to_data').nullable()
 		table.integer('reactions').nullable();
+		table.boolean('is_recast').nullable();
+		table.string('recasted_cast_hash').nullable();
+		table.specificType('recasters', 'text ARRAY').nullable();
 		table.integer('recasts').nullable();
 		table.integer('watches').nullable();
 		table.specificType('mentions', 'text ARRAY').nullable();
