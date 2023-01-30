@@ -20,7 +20,7 @@ const main = async () => {
 			alias: 'l',
 			describe: 'Strategy that should be used to generate localtrust. The strategy should exist in recommender/strategies/localtrust.ts file',
 			type: 'string',
-			default: 'existingConnections',
+			default: 'enhancedConnections',
 		}) 
 		.help()
 		.argv as { pretrust_strategy: string, localtrust_strategy: string }
