@@ -26,14 +26,17 @@ const existingConnections: LocaltrustStrategy = async (follows: Follow[]): Promi
 const enhancedConnections: LocaltrustStrategy = async (follows: Follow[]): Promise<LocalTrust> => {
 	const localTrust: LocalTrust = []
 
+	/**
+	 * Generate likes data
+	*/
 	const likesCount = await db('likes')
 		.select('fid', 'author_fid', db.raw('count(1) as count'))
 		.innerJoin('casts', 'cast_hash', 'casts.hash')
 		.groupBy('fid', 'author_fid')
 
-	let maxLikes = likesCount
-		.reduce((max: number, { count }: {count: number}) =>
-		Math.max(max, count), 0)
+	// let maxLikes = likesCount
+	// 	.reduce((max: number, { count }: {count: number}) =>
+	// 	Math.max(max, count), 0)
 
 	let likesMap: {[k: string]: {[v: string]: number}} = {}
 	for (const { fid, authorFid, count } of likesCount) {
@@ -41,6 +44,9 @@ const enhancedConnections: LocaltrustStrategy = async (follows: Follow[]): Promi
 		likesMap[fid][authorFid] = +count
 	}
 	
+	/**
+	 * Generate mentions data
+	*/
 	const mentions = await db.raw(`
 		with m as (
 			select author_fid, unnest(mentions) as mention
@@ -59,6 +65,9 @@ const enhancedConnections: LocaltrustStrategy = async (follows: Follow[]): Promi
 		mentionsMap[authorFid][mentionFid] = +count
 	}
 
+	/**
+	 * Generate replies data
+	*/
 	const repliesMap: {[k: string]: {[v: string]: number}} = {}
 	const replies = await db('casts')
 		.select('author_fid', 'reply_parent_fid', db.raw('count(1) as count'))
@@ -70,15 +79,33 @@ const enhancedConnections: LocaltrustStrategy = async (follows: Follow[]): Promi
 		repliesMap[replyParentFid][authorFid] = +count
 	}
 
+	/**
+	 * Generate recasts data
+	*/
+	const recastsMap: {[k: string]: {[v: string]: number}} = {}
+	//select casts.author_fid as recaster_fid, c.author_fid from casts inner join casts c on casts.recasted_cast_hash = c.hash;
+	const recasts = await db('casts')
+		.select('casts.author_fid as recaster_fid', 'c.author_fid', db.raw('count(1) as count'))
+		.innerJoin('casts as c', 'casts.recasted_cast_hash', 'c.hash')
+		.groupBy('recaster_fid', 'c.author_fid')
+
+	for (const { authorFid, recasterFid, count } of recasts) {
+		recastsMap[recasterFid] = repliesMap[recasterFid] || {}
+		recastsMap[recasterFid][authorFid] = +count
+	}
+	
+	console.log('recasts', recastsMap);
+	
 	for (const { followerFid, followingFid } of follows) {
 		const likesCount = likesMap[followerFid] && likesMap[followerFid][followingFid] || 0
 		const mentionsCount = mentionsMap[followerFid] && mentionsMap[followerFid][followingFid] || 0
 		const repliesCount = repliesMap[followerFid] && repliesMap[followerFid][followingFid] || 0
+		const recastsCount = recastsMap[followerFid] && recastsMap[followerFid][followingFid] || 0
 
 		localTrust.push({
 			i: followerFid,
 			j: followingFid,
-			v: 1 + likesCount + mentionsCount + repliesCount
+			v: 1 + likesCount + mentionsCount + repliesCount + recastsCount
 		})
 	}
 
