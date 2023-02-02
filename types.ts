@@ -29,9 +29,7 @@ export interface Profile {
 	followers: string
 	following: string
 	bio: string
-	telegram: string
 	referrer: string
-	connectedAddress: string
 	registeredAt: Date
 	updatedAt: Date
 	customMetrics: object

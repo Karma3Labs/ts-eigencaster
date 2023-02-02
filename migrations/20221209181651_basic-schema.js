@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
 	return knex.schema.createTableIfNotExists('profiles', function (table) {
-		table.integer('fid').unique();
+		table.integer('fid').primary();
 		table.string('address').unique();
 		table.string('username');
 		table.string('display_name').nullable();
@@ -13,23 +13,21 @@ exports.up = function (knex) {
 		table.string('followers');
 		table.string('following');
 		table.string('bio', 1000).nullable();
-		table.string('telegram').nullable();
 		table.string('referrer').nullable();
-		table.string('connected_address');
 		table.dateTime('registered_at');
 		table.datetime('updated_at');
 		table.json('custom_metrics');
-	}).createTableIfNotExists('follows', function (table) {
+	}).createTableIfNotExists('following', function (table) {
 		table.integer('follower_fid');
 		table.integer('following_fid');
 		table.dateTime('created_at');
 		table.unique(['follower_fid', 'following_fid'])
 	}).createTableIfNotExists('casts', function (table) {
-		table.string('hash');
+		table.string('hash').primary();
 		table.string('thread_hash').nullable();
-		table.integer('author_fid');
+		table.integer('author_fid').nullable();
 		table.string('username');
-		table.string('text', 5000).nullable();
+		table.string('text').nullable();
 		table.string('reply_parent_fid').nullable();
 		table.string('reply_parent_hash').nullable();
 		table.string('display_name');
@@ -52,5 +50,5 @@ exports.up = function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = function (knex) {
-	return knex.schema.dropTable('casts').dropTable('follows').dropTable('profiles');
+	return knex.schema.dropTable('casts').dropTable('following').dropTable('profiles');
 };

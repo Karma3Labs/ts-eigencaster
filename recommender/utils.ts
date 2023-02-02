@@ -3,13 +3,13 @@ import { getDB } from "../utils"
 
 export const getAllFollows = async (): Promise<Follow[]> => {
 	const db = getDB()
-	return db('follows')
+	return db('following')
 		.select()
 }
 
 export const getFollowersOfAddress = async (address: EthAddress): Promise<Set<EthAddress>> => {
 	const db = getDB()
-	const follows = await db('follows')
+	const follows = await db('following')
 		.where('following', address)
 		.select()
 

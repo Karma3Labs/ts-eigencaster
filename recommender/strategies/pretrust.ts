@@ -24,7 +24,7 @@ const pretrustSpecificFids: PretrustPicker = async () => {
 
 const pretrustFollowsOfFid: PretrustPicker = async (fid?: number) => {
 	const pretrust: Pretrust = []
-	const follows = await db('follows')
+	const follows = await db('following')
 		.where('followerFid', fid)
 		.select()
 

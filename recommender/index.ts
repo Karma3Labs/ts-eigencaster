@@ -66,12 +66,12 @@ export default class Recommender {
 				)
 				.from('profiles')
 				.join('recommendations', 'profiles.fid', 'recommendations.fid')
-				.leftJoin('follows AS you_follow', function () {
+				.leftJoin('following AS you_follow', function () {
 					this
 						.on('you_follow.follower_fid', '=', 'profiles.fid')
 						.andOn('you_follow.following_fid', '=', db.raw('?', +fid))
 				})
-				.leftJoin('follows AS follows_you', function () {
+				.leftJoin('following AS follows_you', function () {
 					this
 						.on('follows_you.following_fid', '=', 'profiles.fid')
 						.andOn('follows_you.follower_fid', '=', db.raw('?', +fid))

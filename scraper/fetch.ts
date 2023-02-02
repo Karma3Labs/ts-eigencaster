@@ -17,9 +17,7 @@ export const getProfiles = async (offset: number, limit: number): Promise<Profil
 			followers: r.followers || 0,
 			following: r.following || 0,
 			bio: r.bio,
-			telegram: r.telegram || null,
 			referrer: r.referrer || null,
-			connectedAddress: r.connected_address,
 			registeredAt: new Date(r.registered_at),
 			updatedAt: new Date(r.updated_at),
 			customMetrics: r.custom_metrics

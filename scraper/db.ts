@@ -6,7 +6,7 @@ export const saveFollows = async (db: Knex, follows: Follow[]) => {
 		return
 	}
 
-	await db("follows")
+	await db("following")
 		.insert(follows)
 		.onConflict()
 		.ignore()

@@ -94,8 +94,6 @@ const enhancedConnections: LocaltrustStrategy = async (follows: Follow[]): Promi
 		recastsMap[recasterFid][authorFid] = +count
 	}
 	
-	console.log('recasts', recastsMap);
-	
 	for (const { followerFid, followingFid } of follows) {
 		const likesCount = likesMap[followerFid] && likesMap[followerFid][followingFid] || 0
 		const mentionsCount = mentionsMap[followerFid] && mentionsMap[followerFid][followingFid] || 0
