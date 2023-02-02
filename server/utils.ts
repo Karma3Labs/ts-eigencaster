@@ -6,7 +6,7 @@ export const getFidFromQueryParams = async (query: Record<string, any>): Promise
 			throw new Error('Invalid fid') 
 		}
 		if (!(await profileExists(query.fid))) {
-			throw new Error('User does not exist')
+			throw new Error('Fid does not exist')
 		}
 
 		return +query.fid
@@ -17,7 +17,7 @@ export const getFidFromQueryParams = async (query: Record<string, any>): Promise
 		const fid = await getFidByAddress(stripped)
 
 		if (!fid) {
-			throw new Error('Username does not exist')
+			throw new Error('Address does not exist')
 		}
 
 		return fid
