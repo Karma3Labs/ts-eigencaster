@@ -2,7 +2,7 @@ import { saveProfiles, saveFollows, saveCasts, saveLikes } from './db'
 import { getProfiles, getFollows, getCasts, getLikes } from './fetch'
 import { getDB } from '../utils'
 
-const BATCH_SIZE = 100
+const BATCH_SIZE = 30
 const db = getDB()
 
 const scrapeProfiles = async () => {
