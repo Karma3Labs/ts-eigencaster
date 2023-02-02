@@ -29,17 +29,17 @@ const enhancedConnections: LocaltrustStrategy = async (follows: Follow[]): Promi
 	/**
 	 * Generate likes data
 	*/
-	const likesCount = await db('likes')
+	const likes = await db('likes')
 		.select('fid', 'author_fid', db.raw('count(1) as count'))
 		.innerJoin('casts', 'cast_hash', 'casts.hash')
 		.groupBy('fid', 'author_fid')
 
-	// let maxLikes = likesCount
-	// 	.reduce((max: number, { count }: {count: number}) =>
-	// 	Math.max(max, count), 0)
+	const maxLikes = likes
+		.reduce((max: number, { count }: {count: number}) =>
+		Math.max(max, count), 0)
 
 	let likesMap: {[k: string]: {[v: string]: number}} = {}
-	for (const { fid, authorFid, count } of likesCount) {
+	for (const { fid, authorFid, count } of likes) {
 		likesMap[fid] = likesMap[fid] || {}
 		likesMap[fid][authorFid] = +count
 	}
@@ -59,6 +59,11 @@ const enhancedConnections: LocaltrustStrategy = async (follows: Follow[]): Promi
 			inner join profiles
 				on profiles.username = mention::jsonb->>'username' group by 1, 2;
 	`)
+
+	const maxMentions = mentions.rows
+		.reduce((max: number, { count }: {count: number}) =>
+		Math.max(max, count), 0)
+
 	const mentionsMap: {[k: string]: {[v: string]: number}} = {}
 	for (const { authorFid, mentionFid, count } of mentions.rows) {
 		mentionsMap[authorFid] = mentionsMap[authorFid] || {}
@@ -68,12 +73,16 @@ const enhancedConnections: LocaltrustStrategy = async (follows: Follow[]): Promi
 	/**
 	 * Generate replies data
 	*/
-	const repliesMap: {[k: string]: {[v: string]: number}} = {}
 	const replies = await db('casts')
 		.select('author_fid', 'reply_parent_fid', db.raw('count(1) as count'))
 		.whereNotNull('reply_parent_fid')
 		.groupBy('author_fid', 'reply_parent_fid')
 
+	const maxReplies = replies
+		.reduce((max: number, { count }: {count: number}) =>
+		Math.max(max, count), 0)
+
+	const repliesMap: {[k: string]: {[v: string]: number}} = {}
 	for (const { authorFid, replyParentFid, count } of replies) {
 		repliesMap[replyParentFid] = repliesMap[replyParentFid] || {}
 		repliesMap[replyParentFid][authorFid] = +count
@@ -82,13 +91,16 @@ const enhancedConnections: LocaltrustStrategy = async (follows: Follow[]): Promi
 	/**
 	 * Generate recasts data
 	*/
-	const recastsMap: {[k: string]: {[v: string]: number}} = {}
-	//select casts.author_fid as recaster_fid, c.author_fid from casts inner join casts c on casts.recasted_cast_hash = c.hash;
 	const recasts = await db('casts')
 		.select('casts.author_fid as recaster_fid', 'c.author_fid', db.raw('count(1) as count'))
 		.innerJoin('casts as c', 'casts.recasted_cast_hash', 'c.hash')
 		.groupBy('recaster_fid', 'c.author_fid')
 
+	let maxRecasts = recasts
+		.reduce((max: number, { count }: {count: number}) =>
+		Math.max(max, count), 0)
+
+	const recastsMap: {[k: string]: {[v: string]: number}} = {}
 	for (const { authorFid, recasterFid, count } of recasts) {
 		recastsMap[recasterFid] = repliesMap[recasterFid] || {}
 		recastsMap[recasterFid][authorFid] = +count
@@ -103,7 +115,11 @@ const enhancedConnections: LocaltrustStrategy = async (follows: Follow[]): Promi
 		localTrust.push({
 			i: followerFid,
 			j: followingFid,
-			v: 1 + likesCount + mentionsCount + repliesCount + recastsCount
+			v:  1 * (likesCount / maxLikes) + 
+				5 * (mentionsCount / maxMentions) + 
+				2 * (repliesCount / maxReplies) + 
+				5 * (recastsCount / maxRecasts) +
+				1
 		})
 	}
 
