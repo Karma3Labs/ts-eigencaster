@@ -7,7 +7,8 @@
     "build": "tsc && cp .env dist/",
     "migrate": "npx knex migrate:up",
     "scrape": "yarn build && node dist/scraper/index.js",
-    "serve": "yarn build && node dist/scripts/start-server.js"
+    "serve": "yarn build && node dist/scripts/start-server.js",
+    "global-trust": "yarn build && node dist/scripts/get-global-trust.js"
   },
   "dependencies": {
     "@types/lodash": "^4.14.191",

@@ -96,6 +96,13 @@ export const queryFarcaster = async (endpoint: string) => {
 
 export const queryDiscove = async (sql: string) => {
 	const BASE_URL = 'https://www.discove.xyz/api/feeds'
-	const res = await axios.get(`${BASE_URL}?sql=${sql}`)
-	return res
+	try {
+		const res = await axios.get(`${BASE_URL}?sql=${sql}`)
+		return res
+	}
+	catch (e) {
+		await new Promise(r => setTimeout(r, 5000));
+		const res = await axios.get(`${BASE_URL}?sql=${sql}`)
+		return res
+	}
 }
