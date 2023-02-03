@@ -16,13 +16,15 @@ export default class Recommender {
 	public fids: number[] = []
 	public fidsToIds: Record<number, number> = {}
 
+	public alpha: number
 	public localtrustPicker: LocaltrustStrategy = localStrategies.existingConnections
 	public pretrustPicker: PretrustPicker = pretrustStrategies.pretrustAllEqually.picker
 	public personalized = pretrustStrategies.pretrustAllEqually.personalized
 
 	public globaltrust: GlobalTrust = []
 
-	constructor(pretrustPicker: PretrustStrategy, localtrustPicker = localStrategies.follows) {
+	constructor(pretrustPicker: PretrustStrategy, localtrustPicker = localStrategies.follows, alpha = 0.5) {
+		this.alpha = alpha
 		this.localtrustPicker = localtrustPicker
 		this.pretrustPicker = pretrustPicker.picker
 		this.personalized = pretrustPicker.personalized
@@ -164,7 +166,7 @@ export default class Recommender {
 					size: this.fids.length,
 					entries: pretrust,
 				},
-				alpha: 0.9
+				alpha: this.alpha
 			})
 
 			console.timeEnd('calculation')
