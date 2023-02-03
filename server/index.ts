@@ -1,9 +1,6 @@
-import { utils } from 'ethers'
 import express, { Request, Response } from 'express'
 import Recommender from '../recommender'
 import { getFidFromQueryParams } from './utils'
-import { LocaltrustStrategy } from '../recommender/strategies/localtrust'
-import { PretrustStrategy } from '../recommender/strategies/pretrust'
 
 const app = express()
 const PORT = 8080

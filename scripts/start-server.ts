@@ -1,6 +1,4 @@
 import yargs from 'yargs'
-import path from 'path'
-import fs from 'fs'
 import Recommender from '../recommender'
 import serve from '../server/index'
 import { strategies as ptStrategies } from '../recommender/strategies/pretrust'

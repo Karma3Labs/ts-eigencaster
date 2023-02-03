@@ -1,6 +1,6 @@
 import  path from 'path'
 import axios from "axios"
-import { AdjacencyMap, Cast, Follow, Profile } from "../types"
+import { Cast, Follow, Profile } from "../types"
 import { Pretrust, LocalTrust, GlobalTrust, Entry } from '../types'
 import { getAllFollows, objectFlip } from "./utils"
 import { PretrustPicker, PretrustStrategy, strategies as pretrustStrategies } from './strategies/pretrust'
