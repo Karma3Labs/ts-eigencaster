@@ -45,8 +45,8 @@ const main = async () => {
 	console.log('Using localtrust strategy:', argv.localtrust_strategy)
 
 	console.log("Calculating recommendation")
-	const recommender = new Recommender()
-	await recommender.init(pretrustStrategy, localtrustStrategy)
+	const recommender = new Recommender(pretrustStrategy, localtrustStrategy)
+	await recommender.load()
 	const globalTrust = recommender.globaltrust
 
 	console.log("Populating with usernames")

@@ -8,7 +8,7 @@ import { PretrustStrategy } from '../recommender/strategies/pretrust'
 const app = express()
 const PORT = 8080
 
-export default (recommender: Recommender, pretrustStrategy: PretrustStrategy, localtrustStrategy: LocaltrustStrategy) => {
+export default (recommender: Recommender) => {
 	app.get('/suggest_profiles', async (req: Request, res: Response) => {
 		try {
 			const fid = await getFidFromQueryParams(req.query)
@@ -42,8 +42,13 @@ export default (recommender: Recommender, pretrustStrategy: PretrustStrategy, lo
 	})
 
 	app.listen(PORT, async () => {
-		recommender = new Recommender()
-		await recommender.init(pretrustStrategy, localtrustStrategy)
+		await recommender.load()
+		setTimeout(
+			async () => {
+				console.log("Recalculating eigentrust")
+				await recommender.load()
+			},
+		1000 * 60 * 10) // 10 minutes
 
 		console.log(`Magic is happening on port: ${PORT}`)
 	})

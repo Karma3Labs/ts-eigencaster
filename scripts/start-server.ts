@@ -39,8 +39,8 @@ const main = async () => {
 	const localtrustStrategy = ltStrategies[argv.localtrust_strategy]
 	console.log('Using localtrust strategy:', argv.localtrust_strategy)
 
-	const recommender = new Recommender()
-	serve(recommender, pretrustStrategy, localtrustStrategy)
+	const recommender = new Recommender(pretrustStrategy, localtrustStrategy)
+	serve(recommender)
 }
 
 main()

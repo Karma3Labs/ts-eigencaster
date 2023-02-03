@@ -22,19 +22,18 @@ export default class Recommender {
 
 	public globaltrust: GlobalTrust = []
 
-	async init(pretrustPicker: PretrustStrategy, localtrustPicker = localStrategies.follows) {
+	constructor(pretrustPicker: PretrustStrategy, localtrustPicker = localStrategies.follows) {
+		this.localtrustPicker = localtrustPicker
+		this.pretrustPicker = pretrustPicker.picker
+		this.personalized = pretrustPicker.personalized
+	}
+
+	async load() {
 		this.fids = await this.getAllProfiles()
 		this.fidsToIds = objectFlip(this.fids)
 		this.follows = await getAllFollows()
 
-		console.log(`Loaded ${this.fids.length} profiles and ${this.follows.length} follows`)
-
-		this.localtrustPicker = localtrustPicker
-		this.pretrustPicker = pretrustPicker.picker
-		this.personalized = pretrustPicker.personalized
-
 		if (!this.personalized) {
-			console.log('Since the strategy is not personalized, we can precompute the global trust')
 			this.globaltrust = await this.runEigentrust()
 		}
 	}
@@ -136,11 +135,9 @@ export default class Recommender {
 	private runEigentrust = async (fid?: number): Promise<GlobalTrust> => {
 		const pretrust = await this.pretrustPicker(fid)
 		const convertedPretrust = this.convertPretrustToIds(pretrust)
-		console.log(`Generated pretrust with ${pretrust.length} entries`)
 
 		const localtrust = await this.localtrustPicker(this.follows)
 		const convertedLocaltrust = this.convertLocaltrustToIds(localtrust)
-		console.log(`Generated localtrust with ${localtrust.length} entries`)
 
 		const res = await this.requestEigentrust(
 			convertedLocaltrust,
@@ -170,7 +167,7 @@ export default class Recommender {
 				alpha: 0.9
 			})
 
-			console.timeLog('calculation')
+			console.timeEnd('calculation')
 			return res.data.entries
 		}
 		catch (e) {
