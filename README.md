@@ -47,7 +47,7 @@ Here's a typescript wrapper of the [Eigentrust Basic API](https://k3l.io/docs/ap
 ## Populating the database manually.
 
 - From the databse dump
-  - Download the [database dump](fill me)
+  - Download the [database dump](https://karma3labs.s3.amazonaws.com/farcaster.sql.gz)
   - `cat farcaster.sql.gz | gunzip | psql -h localhost -U postgres -W -d farcaster`
 - From the csv files
   - Download [edges.csv](fill-me) and [nodes.csv](fill-me)
