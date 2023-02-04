@@ -1,3 +1,30 @@
+**Karma3 Labs** is building a reputation protocol for web3 using the EigenTrust algorithm. EigenTrust provides a ranking and reputation system for web3 apps and protocols.
+
+## EigenTrust APIs for Farcaster Developers
+
+We’ve created EigenTrust APIs which developers can use to create a recommendation engine for People, Casts or any other attributes in their respective front-ends/clients.
+
+To know more about how EigenTrust works in the web3 social or Farcaster context, you can read our v2 docs [here.](https://karma3-labs.gitbook.io/karma3labs/eigentrust/example-use-case) Also check out our developer tutorial [video]([url](https://drive.google.com/file/d/1j8fDxdt7CNlk1DH5i7k_3Fth75xfsxOL/view?usp=sharing)).
+
+**ts-farcaster** abstracts EigenTrust details away from developers by wrapping the core EigenTrust API with the necessary pre-/post-processing steps, so Farcaster clients don’t have to speak in EigenTrust terms such as local trust, pre-trust, and alpha/epsilon parameters.
+
+**Some Terms**
+
+Global Trust values: 
+
+Local Trust values:
+
+Pre-trust strategy:
+
+**What can you do with our API?**
+
+1. Create your own configurable Global profile rankings which can help with identifying most popular as well as potentially sybil profiles. This information can help power your content or feed recommendations for users.
+
+2. Create a Personalized recommendation system for People to follow, Casts and other popular context based on individual social graphs. This can enable more relevant and contextual user-experiences for clients. 
+  
+...
+
+
 # Farcaster Scraper and Recommender
 
 Here's a typescript wrapper of the [Eigentrust Basic API](https://k3l.io/docs/api/basic/v1/) for the farcaster protocol.
@@ -14,7 +41,7 @@ Here's a typescript wrapper of the [Eigentrust Basic API](https://k3l.io/docs/ap
   - For the docker container the default database credentials are `postgres`/`postgres`.
   - For the `EIGENTRUST_API` you can either call the hosted service at `https://api.k3l.io/basic/v1/` or self-host it using [this repo](https://github.com/Karma3Labs/go-eigentrust).
 
-## Running
+## Running your own Global Profile Ranking and Personalized Recommendation Algorithms
 
 - Pick a pretrust strategy from the existing ones or create a new one on the file: `./recommender/strategies/pretrust.ts`. The existing pretrust strategies are:
 
