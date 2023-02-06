@@ -78,9 +78,8 @@ export default class Recommender {
 		.modify((q: any) => !includeFollowing && q.whereNull('you_follow'))
 		.limit(limit)
 
-		const res = result.sort((a: Profile, b: Profile) => suggestions.indexOf(a.fid) - suggestions.indexOf(b.fid))
-
-		return res
+		return result.sort((a: Profile, b: Profile) => 
+			suggestions.indexOf(a.fid) - suggestions.indexOf(b.fid))
 	}
 
 	async recommendCasts(root: number, limit = 20) {
@@ -108,23 +107,6 @@ export default class Recommender {
 		casts.sort((a: Cast, b: Cast) => scores[b.hash] - scores[a.hash])
 
 		return casts
-	}
-
-	async populateRecommendationsTable(trx: Knex.Transaction<any, any[]>, suggestions: any[]) {
-		// Raw because Knex doesn't support temporary tables
-		await trx.schema.raw(`
-				CREATE TEMPORARY TABLE recommendations (
-					rank integer PRIMARY KEY,
-					fid integer NOT NULL UNIQUE  -- implies an index
-				)
-				ON COMMIT DROP
-			`)
-
-		let values = []
-		for (const [index, fid] of suggestions.entries()) {
-			values.push({rank: index, fid: +fid })
-		}
-		await trx.insert(values).into('recommendations')
 	}
 
 	private runEigentrust = async (fid?: number): Promise<GlobalTrust> => {
