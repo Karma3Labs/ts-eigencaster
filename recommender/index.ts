@@ -21,6 +21,8 @@ export default class Recommender {
 	public pretrustPicker: PretrustPicker = pretrustStrategies.pretrustAllEqually.picker
 	public personalized = pretrustStrategies.pretrustAllEqually.personalized
 
+	public localtrust: LocalTrust = []
+	public localtrustIds: LocalTrust = []
 	public globaltrust: GlobalTrust = []
 
 	constructor(pretrustPicker: PretrustStrategy, localtrustPicker = localStrategies.follows, alpha = 0.5) {
@@ -34,13 +36,15 @@ export default class Recommender {
 		this.fids = await this.getAllProfiles()
 		this.fidsToIds = objectFlip(this.fids)
 		this.follows = await getAllFollows()
+		this.localtrust = await this.localtrustPicker(this.follows)
+		this.localtrustIds  = this.convertLocaltrustToIds(this.localtrust)
 
 		if (!this.personalized) {
 			this.globaltrust = await this.runEigentrust()
 		}
 	}
 
-	async recommend(fid: number, limit = 20) {
+	async recommend(fid: number) {
 		if (this.personalized) {
 			this.globaltrust = await this.runEigentrust(fid)
 		}
@@ -48,50 +52,39 @@ export default class Recommender {
 		globalTrustEntries.sort((a: Entry, b: Entry)  => b[1] - a[1]) 
 
 		//TODO: Pagination
-		return globalTrustEntries.map(([fid]) => fid).slice(0, limit)
+		return globalTrustEntries.map(([fid]) => fid)
 	}
 
 	
 	async recommendProfiles(fid: number, limit = 20, includeFollowing: boolean = true) {
 		const suggestions = await this.recommend(fid)
-		const result: any[] = []
 
-		await db.transaction(async (trx: Knex.Transaction) => {
-			await this.populateRecommendationsTable(trx, suggestions)
-			result.splice(0, 0, ...await trx
-				.select(
-					'profiles.*',
-					'recommendations.rank',
-					db.raw('follows_you.follower_fid NOTNULL as follows_you'),
-					db.raw('you_follow.following_fid NOTNULL as you_follow'),
-				)
-				.from('profiles')
-				.join('recommendations', 'profiles.fid', 'recommendations.fid')
-				.leftJoin('following AS you_follow', function () {
-					this
-						.on('you_follow.follower_fid', '=', 'profiles.fid')
-						.andOn('you_follow.following_fid', '=', db.raw('?', +fid))
-				})
-				.leftJoin('following AS follows_you', function () {
-					this
-						.on('follows_you.following_fid', '=', 'profiles.fid')
-						.andOn('follows_you.follower_fid', '=', db.raw('?', +fid))
-				})
-				.where(function () {
-					this.where('profiles.fid', '!=', db.raw('?', +fid))
-					if (!includeFollowing) {
-						this.whereNull('you_follow')
-					}
-				})
-				.orderBy('rank')
-				.limit(limit))
-			await trx.commit()
+		const result = await db('profiles').select(
+			'profiles.*',
+			db.raw('follows_you.follower_fid NOTNULL as follows_you'),
+			db.raw('you_follow.following_fid NOTNULL as you_follow'),
+		)
+		.leftJoin('following AS follows_you', function (k: any) {
+			k
+				.on('follows_you.follower_fid', '=', 'profiles.fid')
+				.andOn('follows_you.following_fid', '=', db.raw('?', +fid))
 		})
-		return result
+		.leftJoin('following AS you_follow', function (k: any) {
+			k
+				.on('you_follow.following_fid', '=', 'profiles.fid')
+				.andOn('you_follow.follower_fid', '=', db.raw('?', +fid))
+		})
+		.whereIn('profiles.fid', suggestions)
+		.modify((q: any) => !includeFollowing && q.whereNull('you_follow'))
+		.limit(limit)
+
+		const res = result.sort((a: Profile, b: Profile) => suggestions.indexOf(a.fid) - suggestions.indexOf(b.fid))
+
+		return res
 	}
 
 	async recommendCasts(root: number, limit = 20) {
-		const suggestions = await this.recommend(root, 50)
+		const suggestions = (await this.recommend(root)).slice(limit)
 
 		const popularityScores = await db('casts').select(
 			'hash',
@@ -138,11 +131,8 @@ export default class Recommender {
 		const pretrust = await this.pretrustPicker(fid)
 		const convertedPretrust = this.convertPretrustToIds(pretrust)
 
-		const localtrust = await this.localtrustPicker(this.follows)
-		const convertedLocaltrust = this.convertLocaltrustToIds(localtrust)
-
 		const res = await this.requestEigentrust(
-			convertedLocaltrust,
+			this.localtrustIds,
 			convertedPretrust,
 		)
 
