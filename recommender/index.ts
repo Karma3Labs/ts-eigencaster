@@ -64,15 +64,15 @@ export default class Recommender {
 			db.raw('follows_you.follower_fid NOTNULL as follows_you'),
 			db.raw('you_follow.following_fid NOTNULL as you_follow'),
 		)
-		.leftJoin('following AS follows_you', function (k: any) {
-			k
+		.leftJoin('following AS follows_you', function (q: any) {
+			q
 				.on('follows_you.follower_fid', '=', 'profiles.fid')
-				.andOn('follows_you.following_fid', '=', db.raw('?', +fid))
+				.andOn('follows_you.following_fid', '=', fid)
 		})
-		.leftJoin('following AS you_follow', function (k: any) {
-			k
+		.leftJoin('following AS you_follow', function (q: any) {
+			q
 				.on('you_follow.following_fid', '=', 'profiles.fid')
-				.andOn('you_follow.follower_fid', '=', db.raw('?', +fid))
+				.andOn('you_follow.follower_fid', '=', fid)
 		})
 		.whereIn('profiles.fid', suggestions)
 		.modify((q: any) => !includeFollowing && q.whereNull('you_follow'))
