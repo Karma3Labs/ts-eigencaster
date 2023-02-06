@@ -116,9 +116,9 @@ const enhancedConnections: LocaltrustStrategy = async (follows: Follow[]): Promi
 			i: followerFid,
 			j: followingFid,
 			v:  1 * (likesCount / maxLikes) + 
-				5 * (mentionsCount / maxMentions) + 
-				2 * (repliesCount / maxReplies) + 
-				5 * (recastsCount / maxRecasts) +
+				3 * (repliesCount / maxReplies) + 
+				6 * (recastsCount / maxRecasts) +
+				8 * (mentionsCount / maxMentions) + 
 				1
 		})
 	}
