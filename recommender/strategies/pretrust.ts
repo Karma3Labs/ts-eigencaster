@@ -8,6 +8,23 @@ const pretrustAllEqually: PretrustPicker = async () => {
 	return [] as Pretrust
 }
 
+const pretrustSpecificUsernames: PretrustPicker = async () => {
+	const pretrustedUsernames = [
+		'dwr', 'v', 'balajis', 'vbuterin','ccarella','Tim','les','linda','ace','vm','cdixon' ]
+	const pretrust: Pretrust = []
+
+	const fids = await db('profiles').select('fid').whereIn('username', pretrustedUsernames)
+
+	fids.forEach(({ fid }: {fid: number}) => {
+		pretrust.push({
+			i: fid,
+			v: 1 / pretrustedUsernames.length
+		})
+	})
+
+	return pretrust
+}
+
 const pretrustSpecificFids: PretrustPicker = async () => {
 	const pretrustedFids = [1, 2]
 	const pretrust: Pretrust = []
@@ -25,7 +42,7 @@ const pretrustSpecificFids: PretrustPicker = async () => {
 const pretrustFollowsOfFid: PretrustPicker = async (fid?: number) => {
 	const pretrust: Pretrust = []
 	const follows = await db('following')
-		.where('followerFid', fid)
+		.where('follower_fid', fid)
 		.select()
 
 	follows.forEach((follow: Follow) => {
@@ -60,6 +77,7 @@ const pretrustFirst20Profiles: PretrustPicker = async () => {
 export const strategies: Record<string, PretrustStrategy> = {
 	pretrustAllEqually: { picker: pretrustAllEqually, personalized: false },
 	pretrustSpecificFids: { picker: pretrustSpecificFids, personalized: false },
+	pretrustSpecificUsernames: { picker: pretrustSpecificUsernames, personalized: false },
 	pretrustFollowsOfFid: { picker: pretrustFollowsOfFid, personalized: true },
 	pretrustFirst20Profiles: { picker: pretrustFirst20Profiles, personalized: false }
 }
