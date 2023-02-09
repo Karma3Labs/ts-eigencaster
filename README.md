@@ -86,8 +86,8 @@ We have generated global trust values in CSV format, using 6 combinations (2 loc
 | Strategies (PT\LT) | `existingConnections` | `enhancedConnections` |
 | ------------------ | --------------------- | --------------------- |
 | **`pretrustAllEqually`** | [CSV](https://s3.us-west-2.amazonaws.com/k3l.io/globaltrust-existingConnections-pretrustAllEqually.csv) | [CSV](https://s3.us-west-2.amazonaws.com/k3l.io/globaltrust-enhancedConnections-pretrustAllEqually.csv) |
-| **`pretrustSpecificHandles`** | [CSV](https://s3.us-west-2.amazonaws.com/k3l.io/globaltrust-existingConnections-pretrustSpecificHandles.csv) | [CSV](https://s3.us-west-2.amazonaws.com/k3l.io/globaltrust-enhancedConnections-pretrustSpecificHandles.csv) |
-| **`pretrustFollowersOfHandle`** | [CSV](https://s3.us-west-2.amazonaws.com/k3l.io/globaltrust-existingConnections-pretrustFollowersOfHandle.csv) | [CSV](https://s3.us-west-2.amazonaws.com/k3l.io/globaltrust-enhancedConnections-pretrustFollowersOfHandle.csv) |
+| **`pretrustSpecificUsernames`** | [CSV](https://s3.us-west-2.amazonaws.com/k3l.io/globaltrust-existingConnections-pretrustSpecificUsernames.csv) | [CSV](https://s3.us-west-2.amazonaws.com/k3l.io/globaltrust-enhancedConnections-pretrustSpecificUsernames.csv) |
+| **`pretrustFirst20Profiles`** | [CSV](https://s3.us-west-2.amazonaws.com/k3l.io/globaltrust-existingConnections-pretrustFirst20Profiles.csv) | [CSV](https://s3.us-west-2.amazonaws.com/k3l.io/globaltrust-enhancedConnections-pretrustFirst20Profiles.csv) |
 
 Feel free to experiment by modifying/adding the strategies then regenerating your own CSV, by just running:
 
