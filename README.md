@@ -10,27 +10,35 @@ To know more about how EigenTrust algorithm works in the web3 social or Farcaste
 
 Here’s an overview of key concepts involved in EigenTrust compute rankings, you can also read the [**details on the core concepts**](https://karma3-labs.gitbook.io/karma3labs/eigentrust/core-concepts).
 
-**Pre-trust (or seed) Peers:** This parameter gives you an opportunity to either treat all profiles equally to being with, or define a few profiles you’d like to consider trustworthy. This variable allows for configuring how much trust you place in some or all of the profiles in the network. 
+**Local trust:** This is the primary input for EigenTrust and lets you decide the trust or reputation link between any two profiles.  To recap, local trust is a direct trust opinion by one peer on another peer, and is represented as a nonnegative number (0: no opinion/neutral trust).
+
+We have created 2 strategies for you to choose from.  In each of these, between two profiles A and B, A's local trust level upon B is deemed to be:
+
+1. A unit amount >0 iff A follows B; otherwise 0.
+2. A linear combination of:
+  1. A unit amount >0 iff A follows B
+  2. Number of mentions of B by A
+  3. Number of posts by B that A recasts
+  4. Number of A's replies to B's posts.
+
+You can use either one, or you can define your own too.
+
+**Pre-trusted peers:** In EigenTrust, if a few trustworthy peers are known in advance, it is possible to treat their local trust opinions more heavily than others'.  These peers are called **pre-trusted** peers; incorporating pre-trusted peers greatly help efficacy of detecting and discrediting sybil peers in the network.
+
+Pre-trusted peers are also used as the starting point of EigenTrust calculation.  The net effect is that a peer receives a non-zero global trust score iff there exists a trust path from at least one pre-trusted peer.  For this reason, pre-trusted peers are also known as **seed peers.**
 
 We have created 3 strategies for you to use, you can configure the parameters based on your choice:
 
-1. Pre-trust all profiles equally
+1. Pre-trust all profiles equally (no bias).
 2. Pre-trust some trustworthy profiles (eg: First 50 profiles)
-3. Pre-trust the profiles you already follow 
+3. Pre-trust the profiles you already follow. 
 
-**Local trust:** This is the primary input for EigenTrust and lets you decide the trust or reputation link between any two profiles. 
-
-We have created 2 strategies for you to use, you can configure the parameters based on your choice or create a new strategy:
-
-1. Reputation of a profile is dependent on whether you ‘follow’ that profile directly.
-2. Reputation of a profile is dependent on a linear combination of ‘follow’+ ‘mention’+’recast’+’reply’ 
-
-**Pre-trust Confidence Level (’a’ value):** This value assigns a weight to the pre-trust or seed peers in the output of the ranking. This value can be between 0 and 1. We have set it at 0.8 as default.
+**Pre-trust Confidence Level (’a’ value):** This value assigns a weight to the pre-trusted peers in the output of the ranking. This value can be between 0 and 1. We have set it at 0.8 as default.  In general, the stronger the confidence level is, the more the opinions of pre-trusted peers and their vicinity (defined in terms of local trust levels) will matter.
 
 **What can you do with our API?**
 
-1. Create your own configurable **Global profile rankings** which can help with identifying most popular as well as potentially sybil profiles. This information can help power your content or feed recommendations for users.
-2. Create a **Personalized recommendation system** for People to Follow, Casts and other popular context based on individual social graphs. This can enable more relevant and contextual user-experiences for clients. Our demo front-end ([Eigencaster](https://github.com/Karma3Labs/eigencaster)) showcases this feature. 
+1. Create your own configurable **global profile rankings** which can help with identifying most popular as well as potentially sybil profiles. This information can help power your content or feed recommendations for users.
+2. Create a **personalized recommendation system** for people to follow, casts and other popular context based on individual social graphs. This can enable more relevant and contextual user-experiences for clients. Our demo front-end **Eigencaster** [(site)][https://eigencaster.k3l.io/] [(source code)](https://github.com/Karma3Labs/eigencaster)) showcases this feature. 
 
 # Farcaster Recommender
 
