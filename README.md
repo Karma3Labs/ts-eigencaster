@@ -56,12 +56,13 @@ We have created 2 strategies for you to use, you can configure the parameters ba
 
 - Pick a pre-trust (seed) strategy from the existing ones or create a new one on the file: `./recommender/strategies/pretrust.ts`. The existing pretrust strategies are:
   | Key | Description |
-  | --- | --- |
+  | --- | ----------- |
   | `pretrustAllEqually` (default) | This strategy doesn't pretrust any users. Since this is a non-personalized strategy, the eigentrust API will be called once on the initialization and the recommendation will be the same, no matter which user called the recommendation. |
   | `pretrustSpecificHandles` | This strategy pretrusts only specific and hardcoded handles in the pretrust file (see the pretrustSpecificHandles function). Again, this is a non-personalized strategy, thus the globalTrust will be calculated once and will be the same for each user. |
   | `pretrustFollowersOfHandle` | This strategy pretrusts the followers of the user that requested the recommendation. Since this is a personalized strategy, the Eigentrust globalTrust will be calculated on every request, and will return a different globalTrust for each different user |
 - Pick a localtrust strategy from the existing ones or crete a new one on the file: `./recommender/strategies/pretrust.ts`. The existing strategies are:
   | Key | Description |
+  | --- | ----------- |
   | `existingConnections` (default) | This strategy creates a graph of edges with weight 1 from a follower to a followee. |
   | `enhancedConnections` | This strategy calculates the localtrust graph by enhancing the follow edges with mentions, recasts, replies and likes. |
 - Run `yarn serve --pretrust <your_strategy>`
