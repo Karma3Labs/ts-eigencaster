@@ -16,10 +16,10 @@ We have created 2 strategies for you to choose from.  In each of these, between 
 
 1. A unit amount >0 iff A follows B; otherwise 0.
 2. A linear combination of:
-  1. A unit amount >0 iff A follows B
-  2. Number of mentions of B by A
-  3. Number of posts by B that A recasts
-  4. Number of A's replies to B's posts.
+    1. A unit amount >0 iff A follows B
+    2. Number of mentions of B by A
+    3. Number of posts by B that A recasts
+    4. Number of A's replies to B's posts.
 
 You can use either one, or you can define your own too.
 
