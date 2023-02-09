@@ -38,7 +38,7 @@ We have created 3 strategies for you to use, you can configure the parameters ba
 **What can you do with our API?**
 
 1. Create your own configurable **global profile rankings** which can help with identifying most popular as well as potentially sybil profiles. This information can help power your content or feed recommendations for users.
-2. Create a **personalized recommendation system** for people to follow, casts and other popular context based on individual social graphs. This can enable more relevant and contextual user-experiences for clients. Our demo front-end **Eigencaster** [(site)][https://eigencaster.k3l.io/] [(source code)](https://github.com/Karma3Labs/eigencaster)) showcases this feature. 
+2. Create a **personalized recommendation system** for people to follow, casts and other popular context based on individual social graphs. This can enable more relevant and contextual user-experiences for clients. Our demo front-end **Eigencaster** [(site)](https://eigencaster.k3l.io/) [(source code)](https://github.com/Karma3Labs/eigencaster)) showcases this feature. 
 
 # Farcaster Recommender
 
