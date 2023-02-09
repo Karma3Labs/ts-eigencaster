@@ -10,7 +10,7 @@ To know more about how EigenTrust algorithm works in the web3 social or Farcaste
 
 Here’s an overview of key concepts involved in EigenTrust compute rankings, you can also read the [**details on the core concepts**](https://karma3-labs.gitbook.io/karma3labs/eigentrust/core-concepts).
 
-**Pre-trust (or seed) Peers:** These are the profiles you’d like to consider trustworthy. This variable allows for configuring how much trust you place in some or all of the profiles in the network. 
+**Pre-trust (or seed) Peers:** This parameter gives you an opportunity to either treat all profiles equally to being with, or define a few profiles you’d like to consider trustworthy. This variable allows for configuring how much trust you place in some or all of the profiles in the network. 
 
 We have created 3 strategies for you to use, you can configure the parameters based on your choice:
 
@@ -22,7 +22,7 @@ We have created 3 strategies for you to use, you can configure the parameters ba
 
 We have created 2 strategies for you to use, you can configure the parameters based on your choice or create a new strategy:
 
-1. Reputation of a profile is dependent on whether you ‘follow’ that profile directly or indirectly.
+1. Reputation of a profile is dependent on whether you ‘follow’ that profile directly.
 2. Reputation of a profile is dependent on a linear combination of ‘follow’+ ‘mention’+’recast’+’reply’ 
 
 **Pre-trust Confidence Level (’a’ value):** This value assigns a weight to the pre-trust or seed peers in the output of the ranking. This value can be between 0 and 1. We have set it at 0.8 as default.
