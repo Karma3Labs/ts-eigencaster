@@ -6,7 +6,7 @@ We’ve created EigenTrust APIs which Farcaster developers can use to create a *
 
 To know more about how EigenTrust algorithm works in the web3 social or Farcaster context, you can read our v1 docs [here.](https://karma3-labs.gitbook.io/karma3labs/eigentrust/example-use-case) Also check out our developer [**tutorial video**](https://drive.google.com/file/u/2/d/1j8fDxdt7CNlk1DH5i7k_3Fth75xfsxOL/view?usp=sharing).
 
-**ts-farcaster** abstracts EigenTrust implementation details away from developers by wrapping the core EigenTrust API with the necessary pre-/post-processing steps, so Farcaster clients don’t have to speak in EigenTrust terms such as local trust, pre-trust, and alpha/epsilon parameters. 
+**ts-eigencaster** abstracts EigenTrust implementation details away from developers by wrapping the core EigenTrust API with the necessary pre-/post-processing steps, so Farcaster clients don’t have to speak in EigenTrust terms such as local trust, pre-trust, and alpha/epsilon parameters. 
 
 Here’s an overview of key concepts involved in EigenTrust compute rankings, you can also read the [**details on the core concepts**](https://karma3-labs.gitbook.io/karma3labs/eigentrust/core-concepts).
 
