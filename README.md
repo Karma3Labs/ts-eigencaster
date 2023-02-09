@@ -79,14 +79,27 @@ We have created 3 strategies for you to use, you can configure the parameters ba
   ```curl 'http://localhost:8080/suggest?address=0xea384b570a23e806a38148e87e6177028afdbae5'```
   ```curl 'http://localhost:8080/suggest?fid=1'```
 
-## Generating global trust values in CSV
+## Global trust values CSV
 
-- For generating all global trust values in a CSV, just run `yarn global-trust`.
-- The script will generate a `globaltrust.csv` file in the root directory of the project.
-- Feel free to adjust the pre-/local trust strategies using the `-pretrust`/`-localtrust` arguments. Note: Since the EigenTrust calculation will be done once, you should use a pretrust strategy that is not personalized.
-- For more info run `yarn global-trust --help`
+We have generated global trust values in CSV format, using 6 combinations (2 local trust strategies &times; 3 pre-trust strategies):
+
+| Strategies (PT\LT) | `existingConnections` | `enhancedConnections` |
+| ------------------ | --------------------- | --------------------- |
+| **`pretrustAllEqually`** | [CSV](https://s3.us-west-2.amazonaws.com/k3l.io/globaltrust-existingConnections-pretrustAllEqually.csv) | [CSV](https://s3.us-west-2.amazonaws.com/k3l.io/globaltrust-enhancedConnections-pretrustAllEqually.csv) |
+| **`pretrustSpecificHandles`** | [CSV](https://s3.us-west-2.amazonaws.com/k3l.io/globaltrust-existingConnections-pretrustSpecificHandles.csv) | [CSV](https://s3.us-west-2.amazonaws.com/k3l.io/globaltrust-enhancedConnections-pretrustSpecificHandles.csv) |
+| **`pretrustFollowersOfHandle`** | [CSV](https://s3.us-west-2.amazonaws.com/k3l.io/globaltrust-existingConnections-pretrustFollowersOfHandle.csv) | [CSV](https://s3.us-west-2.amazonaws.com/k3l.io/globaltrust-enhancedConnections-pretrustFollowersOfHandle.csv) |
+
+Feel free to experiment by modifying/adding the strategies then regenerating your own CSV, by just running:
+
+    yarn global-trust -pretrust <pre-trust-strategy> -localtrust <local-trust-strategy>
+
+The script will generate a `globaltrust.csv` file in the root directory of the project.
+
+**Note:** Since the EigenTrust calculation will be done once, you should use a pretrust strategy that is not personalized.
+
+For more info run `yarn global-trust --help`
 
 ## Populating the database manually
 
-- Download the [database dump](https://karma3labs.s3.amazonaws.com/farcaster.sql.gz)
+- Download the [database dump](https://s3.us-west-2.amazonaws.com/k3l.io/farcaster.sql.gz)
 - `cat farcaster.sql.gz | gunzip | psql -h localhost -U postgres -W -d farcaster`
