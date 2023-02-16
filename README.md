@@ -66,18 +66,20 @@ We have created 3 strategies for you to use, you can configure the parameters ba
   | Key | Description |
   | --- | ----------- |
   | `pretrustAllEqually` (default) | This strategy doesn't pretrust any users. Since this is a non-personalized strategy, the eigentrust API will be called once on the initialization and the recommendation will be the same, no matter which user called the recommendation. |
-  | `pretrustSpecificHandles` | This strategy pretrusts only specific and hardcoded handles in the pretrust file (see the pretrustSpecificHandles function). Again, this is a non-personalized strategy, thus the globalTrust will be calculated once and will be the same for each user. |
-  | `pretrustFollowersOfHandle` | This strategy pretrusts the followers of the user that requested the recommendation. Since this is a personalized strategy, the Eigentrust globalTrust will be calculated on every request, and will return a different globalTrust for each different user |
+  | `pretrustSpecificUsernames` | This strategy pretrusts only specific and hardcoded handles in the pretrust file (see the `pretrustSpecificUsernames` method). Again, this is a non-personalized strategy, thus the globalTrust will be calculated once and will be the same for each user. |
+  | `pretrustSpecificFids` | This strategy pretrusts the followers IDs that are hardcoded in the pretrust file (see `pretrustSpecificFids` method). Similarly, since this is a personalized strategy, the Eigentrust globalTrust will be calculated on every request, and will return a different globalTrust for each different user |
+  | `pretrustFollowsOfFid` | This strategy pretrusts the followers of the user that requested the recommendation.  This is a personalized strategy, the Eigentrust globalTrust will be calculated on every request, and will return a different globalTrust for each different user. |
+  | `pretrustFirst20Profiles` | This strategy pretrusts the the first 20 genesis profiles registered in the target ecosystem.  This is a non-personalized strategy, thus the globalTrust will be calculated once and will be the same for each user. |
 - Pick a localtrust strategy from the existing ones or crete a new one on the file: `./recommender/strategies/pretrust.ts`. The existing strategies are:
   | Key | Description |
   | --- | ----------- |
   | `existingConnections` (default) | This strategy creates a graph of edges with weight 1 from a follower to a followee. |
   | `enhancedConnections` | This strategy calculates the localtrust graph by enhancing the follow edges with mentions, recasts, replies and likes. |
-- Run `yarn serve --pretrust <your_strategy>`
+- Run `yarn serve --pretrust <your_pretrust_strategy> --localtrust <your_localtrust_strategy>`
 - The server will start on port 8080. Call the API by passing as a query param the `fid` or the `address` or the `username` of a given user. Examples:
-  ```curl 'http://localhost:8080/suggest?username=dwr'```
-  ```curl 'http://localhost:8080/suggest?address=0xea384b570a23e806a38148e87e6177028afdbae5'```
-  ```curl 'http://localhost:8080/suggest?fid=1'```
+  - ```curl 'http://localhost:8080/suggest?username=dwr'```
+  - ```curl 'http://localhost:8080/suggest?address=0xea384b570a23e806a38148e87e6177028afdbae5'```
+  - ```curl 'http://localhost:8080/suggest?fid=1'```
 
 ## Global trust values CSV
 
@@ -91,7 +93,7 @@ We have generated global trust values in CSV format, using 6 combinations (2 loc
 
 Feel free to experiment by modifying/adding the strategies then regenerating your own CSV, by just running:
 
-    yarn global-trust -pretrust <pre-trust-strategy> -localtrust <local-trust-strategy>
+    yarn global-trust --pretrust <pre-trust-strategy> --localtrust <local-trust-strategy>
 
 The script will generate a `globaltrust.csv` file in the root directory of the project.
 
