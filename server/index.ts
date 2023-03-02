@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express'
 import Recommender from '../recommender'
-import { getFidFromQueryParams } from './utils'
+import { getFidFromQueryParams, getProfilesFromIds, getPretrustFromQueryParams } from './utils'
 
 const app = express()
 const PORT = 8080
@@ -29,6 +29,31 @@ export default (recommender: Recommender) => {
 
 			const casts = await recommender.recommendCasts(fid, 100)
 			res.send(casts)
+		}
+		catch (e: unknown) {
+			if (e instanceof Error) {
+				console.log(`[SERVER] ${e.message} for input:`, req.query)
+				return res.status(400).send(e.message) //TODO: Parameterize HTTP codes
+			}
+		}
+	})
+
+	app.get('/rankings', async (req: Request, res: Response) => {
+		try {
+			// @ts-ignore
+			const limit = +req.query.limit || 100
+			// @ts-ignore
+			const offset = +req.query.offset || 0
+			const pretrustStrategy = await getPretrustFromQueryParams(req.query)
+			console.log(offset, limit)
+
+			const ids = await Recommender.getGlobaltrusts(pretrustStrategy, recommender.localtrust, 0.5, recommender.fids, recommender.follows)
+			console.log(ids)
+			const profiles = await getProfilesFromIds(ids.slice(offset, limit), offset)
+
+			console.log('Calculating rankings for pretrust:', req.query.pretrust, 'and localtrust:', req.query.localtrust)
+
+			res.send(profiles)
 		}
 		catch (e: unknown) {
 			if (e instanceof Error) {

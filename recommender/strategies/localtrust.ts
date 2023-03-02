@@ -47,6 +47,7 @@ const enhancedConnections: LocaltrustStrategy = async (follows: Follow[]): Promi
 	/**
 	 * Generate mentions data
 	*/
+	console.time('mentions')
 	const mentions = await db.raw(`
 		with m as (
 			select author_fid, unnest(mentions) as mention
@@ -59,6 +60,8 @@ const enhancedConnections: LocaltrustStrategy = async (follows: Follow[]): Promi
 			inner join profiles
 				on profiles.username = mention::jsonb->>'username' group by 1, 2;
 	`)
+	console.timeEnd('mentions')
+
 
 	const maxMentions = mentions.rows
 		.reduce((max: number, { count }: {count: number}) =>
@@ -73,10 +76,12 @@ const enhancedConnections: LocaltrustStrategy = async (follows: Follow[]): Promi
 	/**
 	 * Generate replies data
 	*/
+	console.time('replies')
 	const replies = await db('casts')
 		.select('author_fid', 'reply_parent_fid', db.raw('count(1) as count'))
 		.whereNotNull('reply_parent_fid')
 		.groupBy('author_fid', 'reply_parent_fid')
+	console.timeEnd('replies')
 
 	const maxReplies = replies
 		.reduce((max: number, { count }: {count: number}) =>
@@ -91,10 +96,12 @@ const enhancedConnections: LocaltrustStrategy = async (follows: Follow[]): Promi
 	/**
 	 * Generate recasts data
 	*/
+	console.time('recasts')
 	const recasts = await db('casts')
 		.select('casts.author_fid as recaster_fid', 'c.author_fid', db.raw('count(1) as count'))
 		.innerJoin('casts as c', 'casts.recasted_cast_hash', 'c.hash')
 		.groupBy('recaster_fid', 'c.author_fid')
+	console.timeEnd('recasts')
 
 	let maxRecasts = recasts
 		.reduce((max: number, { count }: {count: number}) =>

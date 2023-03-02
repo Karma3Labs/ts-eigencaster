@@ -32,11 +32,11 @@ export default class Recommender {
 		this.personalized = pretrustPicker.personalized
 	}
 
-	async load() {
-		this.fids = await this.getAllProfiles()
+	async load(profiles?: number[], follows?: Follow[], localtrust?: LocalTrust) {
+		this.fids = profiles || await this.getAllProfiles()
 		this.fidsToIds = objectFlip(this.fids)
-		this.follows = await getAllFollows()
-		this.localtrust = await this.localtrustPicker(this.follows)
+		this.follows = follows || await getAllFollows()
+		this.localtrust = localtrust || await this.localtrustPicker(this.follows)
 		this.localtrustIds  = this.convertLocaltrustToIds(this.localtrust)
 
 		if (!this.personalized) {
@@ -55,7 +55,6 @@ export default class Recommender {
 		return globalTrustEntries.map(([fid]) => fid)
 	}
 
-	
 	async recommendProfiles(fid: number, limit = 20, includeFollowing: boolean = true) {
 		const suggestions = await this.recommend(fid)
 
@@ -138,7 +137,9 @@ export default class Recommender {
 					size: this.fids.length,
 					entries: pretrust,
 				},
-				alpha: this.alpha
+				alpha: this.alpha,
+				epsilon: 1.0,
+				flatTail: 2
 			})
 
 			console.timeEnd('calculation')
@@ -189,5 +190,18 @@ export default class Recommender {
 			}
 		})
 	}
-}
 
+	static async getGlobaltrusts(pretrust: PretrustStrategy, localtrust: LocalTrust, alpha: number, profiles: number[], follows: Follow[]) {
+		if (pretrust.personalized) {
+			throw Error("Non personalized pretrust required")
+		}
+
+		// @ts-ignore
+		const recommender =  new Recommender(pretrust, null, alpha)
+		await recommender.load(profiles, follows, localtrust)
+		const globalTrustEntries: Entry[] = recommender.globaltrust.map((entry: GlobalTrust[0]) => [entry.i, entry.v])
+		globalTrustEntries.sort((a: Entry, b: Entry)  => b[1] - a[1]) 
+
+		return globalTrustEntries.map(([fid]) => fid)
+	}
+}
