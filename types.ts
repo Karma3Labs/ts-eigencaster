@@ -2,7 +2,7 @@ export type EthAddress = string
 export type AdjacencyMap = Record<number, Set<number>>
 
 export type Pretrust = { i: number, v: number }[]
-export type GlobalTrust = { i: number, v: number }[]
+export type GlobalTrust = { i: number, v: number, username?: string, rank?: number }[]
 export type LocalTrust =  { i: number, j: number, v: number }[]
 export type Entry = [ number, number ]
 

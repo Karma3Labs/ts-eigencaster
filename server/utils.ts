@@ -61,3 +61,19 @@ export const getProfilesFromIds = async (ids: number[], offset = 0) => {
 	profiles.sort((a: any, b: any) => ids.indexOf(a.fid) - ids.indexOf(b.fid))
 	return profiles.map((p: any, idx: number) => ({ id: p.fid, followers: +p.count, rank: offset + idx }))
 }
+
+export const getStrategyIdFromQueryParams = async (query: any): Promise<number> => {
+	if (!query.strategy_id) {
+		throw Error('Strategy id is required')
+	}
+	if (isNaN(+query.strategy_id)) { 
+		throw Error("Invalid strategy id")
+	}
+
+	const record = await db('strategies').select('id').where('id', query.strategy_id).first()
+	if (!record) {
+		throw new Error('Strategy id does not exist')
+	}
+
+	return +query.strategy_id
+}

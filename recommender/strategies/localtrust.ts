@@ -1,13 +1,15 @@
 import { db } from '../../server/db'
 import { Follow, LocalTrust } from '../../types'
 
-export type LocaltrustStrategy = (follows: Follow[]) => Promise<LocalTrust>
+export type LocaltrustStrategy = () => Promise<LocalTrust>
 
 /**
  * Generates basic localtrust by transforming all existing connections
 */
-const existingConnections: LocaltrustStrategy = async (follows: Follow[]): Promise<LocalTrust> => {
+const existingConnections: LocaltrustStrategy = async (): Promise<LocalTrust> => {
+	const follows = await db('following')
 	const localTrust: LocalTrust = []
+
 	for (const { followerFid, followingFid } of follows) {
 		localTrust.push({
 			i: followerFid,
@@ -23,7 +25,8 @@ const existingConnections: LocaltrustStrategy = async (follows: Follow[]): Promi
  * Generates localtrust by taking into consuderation the number of likes between
  * two users.
 */
-const enhancedConnections: LocaltrustStrategy = async (follows: Follow[]): Promise<LocalTrust> => {
+const enhancedConnections: LocaltrustStrategy = async (): Promise<LocalTrust> => {
+	const follows = await db('following')
 	const localTrust: LocalTrust = []
 
 	/**

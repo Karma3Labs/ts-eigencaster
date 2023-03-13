@@ -1,14 +1,13 @@
 import { db } from '../../server/db';
 import { Follow, Pretrust, Profile } from '../../types'
 
-export type PretrustPicker = (fid?: number) => Promise<Pretrust>
-export type PretrustStrategy = {picker: PretrustPicker, personalized: boolean}
+export type PretrustStrategy = (fid?: number) => Promise<Pretrust>
 
-const pretrustAllEqually: PretrustPicker = async () => {
+const pretrustAllEqually: PretrustStrategy = async () => {
 	return [] as Pretrust
 }
 
-const pretrustSpecificUsernames: PretrustPicker = async () => {
+const pretrustSpecificUsernames: PretrustStrategy = async () => {
 	const pretrustedUsernames = [
 		'dwr', 'v', 'balajis', 'vbuterin','ccarella','Tim','les','linda','ace','vm','cdixon' ]
 	const pretrust: Pretrust = []
@@ -25,7 +24,7 @@ const pretrustSpecificUsernames: PretrustPicker = async () => {
 	return pretrust
 }
 
-const pretrustSpecificFids: PretrustPicker = async () => {
+const pretrustSpecificFids: PretrustStrategy = async () => {
 	const pretrustedFids = [1, 2]
 	const pretrust: Pretrust = []
 
@@ -39,7 +38,7 @@ const pretrustSpecificFids: PretrustPicker = async () => {
 	return pretrust
 }
 
-const pretrustFollowsOfFid: PretrustPicker = async (fid?: number) => {
+const pretrustFollowsOfFid: PretrustStrategy = async (fid?: number) => {
 	const pretrust: Pretrust = []
 	const follows = await db('following')
 		.where('follower_fid', fid)
@@ -55,7 +54,7 @@ const pretrustFollowsOfFid: PretrustPicker = async (fid?: number) => {
 	return pretrust
 }
 
-const pretrustFirst20Profiles: PretrustPicker = async () => {
+const pretrustFirst20Profiles: PretrustStrategy = async () => {
 	const pretrust: Pretrust = []
 	const profiles = await db('profiles')
 		.select('fid', 'registered_at')
@@ -75,9 +74,9 @@ const pretrustFirst20Profiles: PretrustPicker = async () => {
 
 
 export const strategies: Record<string, PretrustStrategy> = {
-	pretrustAllEqually: { picker: pretrustAllEqually, personalized: false },
-	pretrustSpecificFids: { picker: pretrustSpecificFids, personalized: false },
-	pretrustSpecificUsernames: { picker: pretrustSpecificUsernames, personalized: false },
-	pretrustFollowsOfFid: { picker: pretrustFollowsOfFid, personalized: true },
-	pretrustFirst20Profiles: { picker: pretrustFirst20Profiles, personalized: false }
+	pretrustAllEqually,
+	pretrustSpecificFids,
+	pretrustSpecificUsernames,
+	pretrustFollowsOfFid,
+	pretrustFirst20Profiles,
 }
