@@ -65,9 +65,14 @@ export default class Recommender {
 
 		return globaltrust
 	}
+	
+	static async getGlobaltrustLength(strategyId: number): Promise<number> {
+		const { count } = await db('globaltrust')
+			.where({ strategyId })
+			.count()
+			.first()
 
-	async recommend(limit: 20, fid: number) {
-		throw Error("Not implemented")
+		return +count
 	}
 
 	private runEigentrust = async (localtrust: LocalTrust, pretrust: Pretrust, alpha: number): Promise<GlobalTrust> => {
@@ -176,14 +181,13 @@ export default class Recommender {
 		}
 	}
 
-	static async getRankOfUserByHandle(strategyId: number, username: string): Promise<number> {
+	static async getRankOfUser(strategyId: number, fid: number): Promise<number> {
 		const res = await db.with('globaltrust_ranks', (qb: any) => {
 			return qb.from('globaltrust')
-				.select('i', 'v', 'strategy_id', db.raw('row_number() over (order by v desc) as rank'), 'username')
-				.innerJoin('profiles', 'globaltrust.i', 'profiles.fid')
+				.select('i', 'v', 'strategy_id', db.raw('row_number() over (order by v desc) as rank'))
 				.where('strategy_id', strategyId)
 				.orderBy('v', 'desc')
-		}).select('rank').from('globaltrust_ranks').where('username', username).first()
+		}).select('rank').from('globaltrust_ranks').where('i', fid).first()
 		
 		return res && res.rank
 	}
