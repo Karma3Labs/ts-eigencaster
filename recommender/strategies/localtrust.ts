@@ -25,7 +25,7 @@ const existingConnections: LocaltrustStrategy = async (): Promise<LocalTrust> =>
  * Generates localtrust by taking into consuderation the number of likes between
  * two users.
 */
-const enhancedConnections: LocaltrustStrategy = async (): Promise<LocalTrust> => {
+const rep3rec6m8l1enhancedConnections: LocaltrustStrategy = async (): Promise<LocalTrust> => {
 	const follows = await db('following')
 	const localTrust: LocalTrust = []
 
@@ -138,5 +138,5 @@ const enhancedConnections: LocaltrustStrategy = async (): Promise<LocalTrust> =>
 
 export const strategies: Record<string, LocaltrustStrategy> = {
 	existingConnections,
-	enhancedConnections
+	rep3rec6m8l1enhancedConnections
 }
