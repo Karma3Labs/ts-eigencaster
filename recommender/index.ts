@@ -133,9 +133,19 @@ export default class Recommender {
 	 * Generate a list of users given all connections 
 	 */
 	private async getAllFids(): Promise<number[]> {
-		const profiles = await db('profiles') .select('fid')
+		// const profiles = await db('profiles') .select('fid')
+		const profiles = await db.raw(`
+			with _profiles as (
+				select 
+					distinct on (fid) *
+				from user_data 
+				order by fid desc, id desc
+				)
+			select fid from _profiles 
+			where deleted_at is null
+		`)
 
-		return profiles.map(({ fid }: Profile) => fid)
+		return profiles.rows.map(({ fid }: Profile) => fid)
 	}
 
 	/**
