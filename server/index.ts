@@ -3,7 +3,7 @@ import Recommender from '../recommender'
 import { getFidFromQueryParams, getStrategyIdFromQueryParams } from './utils'
 
 const app = express()
-const PORT = 8080
+const PORT = 9080
 
 export default () => {
 	app.get('/rankings', async (req: Request, res: Response) => {
@@ -17,7 +17,7 @@ export default () => {
 		catch (e: any) {
 			return res.status(400).send(e.message)
 		}
-		console.log(`Recommending rankings in range [${offset}, ${offset + limit}]`)
+		console.log(`Recommending rankings in range [${offset}, ${offset + limit}] for strategy ${strategyId}`)
 
 		try {
 			const globaltrust = await Recommender.getGlobaltrustByStrategyId(strategyId, offset, limit)

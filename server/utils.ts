@@ -55,13 +55,6 @@ export const getFidFromQueryParams = async (query: Record<string, any>): Promise
 	throw new Error('Either address or username should be provided')
 }
 
-export const getProfilesFromIds = async (ids: number[], offset = 0) => {
-	console.log(ids)
-	const profiles = await db('profiles').select('fid').count().innerJoin('following', 'profiles.fid', 'following_fid').groupBy('profiles.fid').whereIn('fid', ids)
-	profiles.sort((a: any, b: any) => ids.indexOf(a.fid) - ids.indexOf(b.fid))
-	return profiles.map((p: any, idx: number) => ({ id: p.fid, followers: +p.count, rank: offset + idx }))
-}
-
 export const getStrategyIdFromQueryParams = async (query: any): Promise<number> => {
 	if (!query.strategy_id) {
 		throw Error('Strategy id is required')

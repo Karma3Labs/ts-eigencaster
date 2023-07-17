@@ -51,19 +51,35 @@ export default class Recommender {
 	}
 
 	static async getGlobaltrustByStrategyId(strategyId: number, offset = 0, limit = 100): Promise<GlobalTrust> {
-		const globaltrust = await db('globaltrust')
-			.where({ strategyId })
-			.select('i', 'username', 'v', db.raw('row_number() over (order by v desc) as rank'))
-			.innerJoin('profiles', 'profiles.fid', 'globaltrust.i')
-			.orderBy('v', 'desc')
-			.offset(offset)
-			.limit(limit)
+		// const globaltrust = await db('globaltrust')
+		// 	.where({ strategyId })
+		// 	.select('i', 'username', 'v', db.raw('row_number() over (order by v desc) as rank'))
+		// 	.innerJoin('profiles', 'profiles.fid', 'globaltrust.i')
+		// 	.orderBy('v', 'desc')
+		// 	.offset(offset)
+		// 	.limit(limit)
+		const globaltrust = await db.raw(`
+			SELECT
+				gt.i, 
+				u.value as username,
+				gt.v,
+				row_number() over (order by v desc) as rank
+			FROM 
+				globaltrust AS gt
+				INNER JOIN user_data AS u ON (u.fid = gt.i and u.type=6)
+			WHERE strategy_id= :strategyId
+			ORDER BY gt.v DESC
+			OFFSET :offset
+			LIMIT :limit
+		`, { strategyId, offset, limit })
 
-		if (!globaltrust.length) {
+		if (!globaltrust.rows.length) {
 			throw new Error(`No globaltrust found in DB for strategy id: ${strategyId}`)
 		}
 
-		return globaltrust
+		console.log(`Number of globaltrust rows: ${globaltrust.rows.length}`)
+
+		return globaltrust.rows
 	}
 	
 	static async getGlobaltrustLength(strategyId: number): Promise<number> {
@@ -192,14 +208,25 @@ export default class Recommender {
 	}
 
 	static async getRankOfUser(strategyId: number, fid: number): Promise<number> {
-		const res = await db.with('globaltrust_ranks', (qb: any) => {
-			return qb.from('globaltrust')
-				.select('i', 'v', 'strategy_id', db.raw('row_number() over (order by v desc) as rank'))
-				.where('strategy_id', strategyId)
-				.orderBy('v', 'desc')
-		}).select('rank').from('globaltrust_ranks').where('i', fid).first()
-		
-		return res && res.rank
+		// const res = await db.with('globaltrust_ranks', (qb: any) => {
+		// 	return qb.from('globaltrust')
+		// 		.select('i', 'v', 'strategy_id', db.raw('row_number() over (order by v desc) as rank'))
+		// 		.where('strategy_id', strategyId)
+		// 		.orderBy('v', 'desc')
+		// }).select('rank').from('globaltrust_ranks').where('i', fid).first()
+		const res = await db.raw(`
+			WITH globaltrust_ranks AS (
+				SELECT i, v, strategy_id, row_number() over (order by v desc) as rank
+				FROM globaltrust AS gt
+				INNER JOIN user_data AS u ON (u.fid = gt.i and u.type=6)
+				WHERE strategy_id=:strategyId
+			) 
+			SELECT rank FROM globaltrust_ranks WHERE i=:fid LIMIT 1
+		`, {strategyId, fid})
+		if (!res.rows.length) {
+			throw new Error(`No entry found in DB for strategy id: ${strategyId}`)
+		}
+		return res.rows[0] && res.rows[0].rank
 	}
 
 	// async recommendProfiles(fid: number, limit = 20, includeFollowing: boolean = true) {
