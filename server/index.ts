@@ -1,9 +1,13 @@
+import  path from 'path'
 import express, { Request, Response } from 'express'
 import Recommender from '../recommender'
 import { getFidFromQueryParams, getStrategyIdFromQueryParams } from './utils'
 
+// TODO: Fix that ugly thingy
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') })
+
 const app = express()
-const PORT = 9080
+const PORT = process.env.PORT || 8080
 
 export default () => {
 	app.get('/rankings', async (req: Request, res: Response) => {
