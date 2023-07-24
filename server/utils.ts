@@ -1,6 +1,7 @@
 import { db, getFidByAddress, getFidByUsername, profileExists  } from "./db"
 import { strategies as pretrustStrategies } from "../recommender/strategies/pretrust"
 import { strategies as localtrustStrategies } from "../recommender/strategies/localtrust"
+import { config } from "../recommender/config"
 
 export const getLocaltrustFromQueryParams = async (query: Record<string, any>) => {
 	if (localtrustStrategies[query.localtrust]) {
@@ -55,10 +56,17 @@ export const getFidFromQueryParams = async (query: Record<string, any>): Promise
 	throw new Error('Either address or username should be provided')
 }
 
-export const getStrategyIdFromQueryParams = async (query: any): Promise<number> => {
-	if (!query.strategy_id) {
-		throw Error('Strategy id is required')
+export const getStrategyIdFromQueryParams = async (query: Record<string, any>): Promise<number> => {
+	if (!query.strategy_id && !query.strategy) {
+		throw Error('strategy or strategy_id is required')
 	}
+
+	if (query.strategy) {
+		if (config.rankingStrategies.has(query.strategy)) {
+			return +config.rankingStrategies.get(query.strategy).strategy_id
+		}
+	}
+
 	if (isNaN(+query.strategy_id)) { 
 		throw Error("Invalid strategy id")
 	}
