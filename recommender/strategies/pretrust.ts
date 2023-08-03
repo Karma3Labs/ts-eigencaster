@@ -9,7 +9,11 @@ const pretrustAllEqually: PretrustStrategy = async () => {
 
 const pretrustSpecificUsernames: PretrustStrategy = async () => {
 	const pretrustedUsernames = [
-		'dwr', 'v', 'balajis', 'vbuterin','ccarella','tim','les','linda','ace','vm','cdixon' ]
+		'dwr.eth', 'varunsrin.eth', 'balajis.eth', 
+		'vitalik.eth','ccarella.eth','tim',
+		'lesgreys.eth','linda','ace',
+		'vm','cdixon.eth' 
+	]
 	const pretrust: Pretrust = []
 
 	// const fids = await db('profiles').select('fid').whereIn('username', pretrustedUsernames)
@@ -18,7 +22,11 @@ const pretrustSpecificUsernames: PretrustStrategy = async () => {
 			distinct fid
 		from user_data 
 		where 
-			value in ('dwr', 'v', 'balajis', 'vbuterin','ccarella','tim','les','linda','ace','vm','cdixon')
+			value in ('dwr.eth', 'varunsrin.eth', 'balajis.eth', 
+								'vitalik.eth','ccarella.eth','tim',
+								'lesgreys.eth','linda','ace',
+								'vm','cdixon.eth')
+			and type=6
 	`)
 
 	fids.rows.forEach(({ fid }: {fid: number}) => {
