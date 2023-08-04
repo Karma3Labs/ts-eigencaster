@@ -8,7 +8,7 @@ export const config = {
 		'pretrustSpecificUsernames',
 	],
 	rankingStrategies: new Map<string,any>([
-		['followship', { 
+		['follows', { 
       strategy_id: 1 
       // pretrust: 'pretrustAllEqually',
 			// localtrust: 'existingConnections',
@@ -26,7 +26,7 @@ export const config = {
 			// localtrust: 'existingConnections',
 			// alpha: 0.5
 		}], 
-    ['influencer', {
+    ['active+OGs', {
       strategy_id: 7
 			// pretrust: 'pretrustSpecificUsernames',
 			// localtrust: 'rep3rec6m8l1enhancedConnections',
