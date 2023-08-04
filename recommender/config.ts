@@ -26,7 +26,7 @@ export const config = {
 			// localtrust: 'existingConnections',
 			// alpha: 0.5
 		}], 
-    ['active+OGs', {
+    ['active OGs', {
       strategy_id: 7
 			// pretrust: 'pretrustSpecificUsernames',
 			// localtrust: 'rep3rec6m8l1enhancedConnections',
