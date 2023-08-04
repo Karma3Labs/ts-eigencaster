@@ -19,6 +19,7 @@ export default () => {
 			strategyId = await getStrategyIdFromQueryParams(req.query)
 		}
 		catch (e: any) {
+			console.log(`Error in query ${req.query}`, e)
 			return res.status(400).send(e.message)
 		}
 		console.log(`Recommending rankings in range [${offset}, ${offset + limit}] for strategy ${strategyId}`)
@@ -49,6 +50,7 @@ export default () => {
 			strategyId = await getStrategyIdFromQueryParams(req.query)
 		}
 		catch (e: any) {
+			console.log(`Error in query ${req.query}`, e)
 			return res.status(400).send(e.message)
 		}
 		console.log(`Recommeding rankings count for strategyId: ${strategyId}`)
@@ -72,6 +74,7 @@ export default () => {
 			strategyId = await getStrategyIdFromQueryParams(req.query)
 		}
 		catch (e: any) {
+			console.log(`Error in query ${req.query}`, e)
 			return res.status(400).send(e.message)
 		}
 		console.log(`Recommeding ranking index for fid: ${fid} and strategyId: ${strategyId}`)
