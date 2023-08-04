@@ -20,13 +20,13 @@ export const config = {
 			// localtrust: 'rep3rec6m8l1enhancedConnections',
 			// alpha: 0.5
 		}], 
-    ['influencer', {
+    ['creator', {
       strategy_id: 5
 			// pretrust: 'pretrustSpecificUsernames',
 			// localtrust: 'existingConnections',
 			// alpha: 0.5
 		}], 
-    ['creator', {
+    ['influencer', {
       strategy_id: 7
 			// pretrust: 'pretrustSpecificUsernames',
 			// localtrust: 'rep3rec6m8l1enhancedConnections',
