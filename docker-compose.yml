@@ -1,0 +1,13 @@
+version: '3'
+services:
+  ts-eigencaster:
+    container_name: ts-eigencaster
+    image: ts-eigencaster
+    ports:
+      - "9000:8080"  # Map host port to container port
+    networks:
+      - ts-eigencaster-network
+
+networks:
+  ts-eigencaster-network:
+    external: true
