@@ -31,7 +31,13 @@ export default () => {
 					id: obj.i,
 					username: obj.username,
 					value: obj.v,
-					rank: obj.rank
+					rank: obj.rank,
+					following: obj.following,
+					followers: obj.followers,
+					likes: obj.likes,
+					replies: obj.replies,
+					recasts: obj.recasts,
+					mentions: obj.mentions,
 				}
 			})
 

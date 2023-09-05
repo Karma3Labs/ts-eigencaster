@@ -1,7 +1,7 @@
 import  path from 'path'
 import axios from "axios"
 import { Profile } from "../types"
-import { Pretrust, LocalTrust, GlobalTrust, Entry } from '../types'
+import { Pretrust, LocalTrust, GlobalTrust, GlobalRank, Entry } from '../types'
 import { objectFlip } from "./utils"
 import { strategies as ptStrategies } from './strategies/pretrust'
 import { strategies as ltStrategies } from './strategies/localtrust'
@@ -50,7 +50,7 @@ export default class Recommender {
 		console.log(`Loaded ${this.globaltrust.length} globaltrust entries from DB`)
 	}
 
-	static async getGlobaltrustByStrategyId(strategyId: number, offset = 0, limit = 100): Promise<GlobalTrust> {
+	static async getGlobaltrustByStrategyId(strategyId: number, offset = 0, limit = 100): Promise<GlobalRank> {
 		// const globaltrust = await db('globaltrust')
 		// 	.where({ strategyId })
 		// 	.select('i', 'username', 'v', db.raw('row_number() over (order by v desc) as rank'))
@@ -59,14 +59,81 @@ export default class Recommender {
 		// 	.offset(offset)
 		// 	.limit(limit)
 		const globaltrust = await db.raw(`
+		WITH 
+		_followers AS (
 			SELECT
+				following_fid,
+				count(follower_fid) AS followers_count
+			FROM
+				mv_follow_links
+			GROUP BY following_fid
+		),
+		_following AS (
+			SELECT
+				follower_fid,
+				count(following_fid) AS following_count
+			FROM
+				mv_follow_links
+			GROUP BY
+				follower_fid
+		),
+		_reactions AS (
+			SELECT
+				target_fid as author_fid, 
+				SUM(CASE WHEN reaction_type = 1 THEN 1 ELSE 0 END) AS likes_count,
+				SUM(CASE WHEN reaction_type = 2 THEN 1 ELSE 0 END) AS recasts_count
+			FROM
+				reactions
+			WHERE
+				reaction_type IN (1,2)
+			GROUP BY
+				target_fid
+		),
+		_replies AS (
+			SELECT
+				parent_fid as author_fid, 
+				count(fid) as replies_count 
+			FROM
+				casts
+			WHERE
+				parent_hash IS NOT NULL
+			GROUP by
+				parent_fid
+		),
+		_mentions AS (
+			WITH
+				mention AS (
+					SELECT fid as from_fid, unnest(mentions) as mention_fid 
+					FROM casts 
+					WHERE array_length(mentions, 1) > 0
+				)
+				SELECT
+					mention_fid,
+					count(from_fid) as mention_count
+				FROM
+					mention
+				GROUP BY
+					mention_fid
+		)
+			SELECT
+				row_number() over (order by v desc) as rank,
 				gt.i, 
 				u.value as username,
 				gt.v,
-				row_number() over (order by v desc) as rank
+				_followers.followers_count as followers,
+				_following.following_count as following,
+				_reactions.likes_count as likes,
+				_replies.replies_count as replies,
+				_reactions.recasts_count as recasts,
+				_mentions.mention_count as mentions
 			FROM 
 				globaltrust AS gt
 				INNER JOIN user_data AS u ON (u.fid = gt.i and u.type=6)
+				INNER JOIN _followers ON (u.fid = _followers.following_fid)
+				INNER JOIN _following ON (u.fid = _following.follower_fid)
+				INNER JOIN _reactions ON (u.fid = _reactions.author_fid)
+				INNER JOIN _replies ON (u.fid = _replies.author_fid)
+				INNER JOIN _mentions ON (u.fid = _mentions.mention_fid)
 			WHERE strategy_id= :strategyId
 			ORDER BY gt.v DESC
 			OFFSET :offset
