@@ -1,30 +1,63 @@
 import { db } from '../../server/db'
-import { Follow, LocalTrust } from '../../types'
+import { kvPair, LocalTrust, LocaltrustStrategy, FollowsLinksRecords, AttributesObject } from '../../types'
 
-export type LocaltrustStrategy = () => Promise<LocalTrust>
+let attributes: AttributesObject = {
+	likes: { map: {}, max: 0 },
+	mentions: { map: {}, max: 0 },
+	replies: { map: {}, max: 0 },
+	recasts: { map: {}, max: 0 },
+}
 
+let follows: FollowsLinksRecords[]
+
+const initializeFollows = async () => {
+	if (follows.length === 0)
+		follows = await getFollows()
+}
+
+const initializeAttributes = async () => {
+	if (Object.keys(attributes.likes.map).length === 0)
+		await getLikesAttributes()
+	if (Object.keys(attributes.replies.map).length === 0)
+		await getRepliesAttributes()
+	if (Object.keys(attributes.mentions.map).length === 0)
+		await getMentionsAttributes()
+	if (Object.keys(attributes.recasts.map).length === 0)
+		await getRecastsAttributes()
+}
+
+const getFollows = async (): Promise<FollowsLinksRecords[]> => {
+	const follows:FollowsLinksRecords[] = await db.raw(`
+	  select 
+		follower_fid, 
+		following_fid
+	  from mv_follow_links 
+	  order by fid, target_fid, id desc
+	`);
+	
+	return follows;
+  };
+  
+  
 /**
  * Generates basic localtrust by transforming all existing connections
 */
 const existingConnections: LocaltrustStrategy = async (): Promise<LocalTrust> => {
 	// const follows = await db('following')
-	const follows = await db.raw(`
-		select 
-			distinct on (fid, target_fid) 
-			fid as follower_fid, 
-			target_fid as following_fid
-		from links 
-		where 
-			type = 'follow'
-		order by fid, target_fid, id desc
-	`)
-
+	// const follows = await db.raw(`
+	// 	select 
+	// 		follower_fid, 
+	// 		following_fid
+	// 	from mv_follow_links 
+	// 	order by fid, target_fid, id desc
+	// `)
+	await initializeFollows()
 	const localTrust: LocalTrust = []
 
-	for (const { followerFid, followingFid } of follows.rows) {
+	for (const follow of follows) {
 		localTrust.push({
-			i: followerFid,
-			j: followingFid,
+			i: follow.follower_fid,
+			j: follow.following_fid,
 			v: 1
 		})
 	}
@@ -32,27 +65,47 @@ const existingConnections: LocaltrustStrategy = async (): Promise<LocalTrust> =>
 	return localTrust
 }
 
-/**
- * Generates localtrust by taking into consuderation the number of likes between
- * two users.
-*/
-const rep3rec6m8l1enhancedConnections: LocaltrustStrategy = async (): Promise<LocalTrust> => {
-	// const follows = await db('following')
-	const follows = await db.raw(`
-		select 
-			distinct on (fid, target_fid) 
-			fid as follower_fid, 
-			target_fid as following_fid
-		from links 
-		where 
-			type = 'follow'
-		order by fid, target_fid, id desc
-	`)
-	const localTrust: LocalTrust = []
 
-	/**
-	 * Generate likes data
-	*/
+/**
+ * Generates localtrust for l1rep3rec6m8enhancedConnections
+*/
+const l1rep3rec6m8enhancedConnections: LocaltrustStrategy = async (): Promise<LocalTrust> => {
+	await initializeFollows()
+	await initializeAttributes()
+	return getCustomLocalTrust(1,3,6,8,1)
+}
+
+/**
+ * Generates localtrust for l1rep6rec12m18enhancedConnections
+*/
+const l1rep6rec12m18enhancedConnections: LocaltrustStrategy = async (): Promise<LocalTrust> => {
+	await initializeFollows()
+	await initializeAttributes()
+	return getCustomLocalTrust(1,6,12,18,1)
+}
+
+/**
+ * Generates localtrust for l8rep6rec3m1enhancedConnections
+*/
+const l8rep6rec3m1enhancedConnections: LocaltrustStrategy = async (): Promise<LocalTrust> => {
+	await initializeFollows()
+	await initializeAttributes()
+	return getCustomLocalTrust(8,6,3,1,1)
+}
+
+/**
+ * Generates localtrust for l18rep12rec6m1enhancedConnections
+*/
+const l18rep12rec6m1enhancedConnections: LocaltrustStrategy = async (): Promise<LocalTrust> => {
+	await initializeFollows()
+	await initializeAttributes()
+	return getCustomLocalTrust(18,12,6,1,1)
+}
+
+/**
+ * Generate likes data
+*/
+const getLikesAttributes = async () => {
 	console.time('likes')
 	// const likes = await db('likes')
 	// 	.select('fid', 'author_fid', db.raw('count(1) as count'))
@@ -70,15 +123,53 @@ const rep3rec6m8l1enhancedConnections: LocaltrustStrategy = async (): Promise<Lo
 		.reduce((max: number, { count }: {count: number}) =>
 		Math.max(max, count), 0)
 
-	let likesMap: {[k: string]: {[v: string]: number}} = {}
+	const likesMap: kvPair = {};
 	for (const { fid, authorFid, count } of likes.rows) {
 		likesMap[fid] = likesMap[fid] || {}
 		likesMap[fid][authorFid] = +count
 	}
-	
-	/**
-	 * Generate mentions data
-	*/
+
+	attributes.replies.map = likesMap;
+	attributes.replies.max = maxLikes;
+  }
+
+
+/**
+ * Generate replies data
+*/
+const getRepliesAttributes = async () => {
+	console.time('replies')
+	// const replies = await db('casts')
+	// 	.select('author_fid', 'reply_parent_fid', db.raw('count(1) as count'))
+	// 	.whereNotNull('reply_parent_fid')
+	// 	.groupBy('author_fid', 'reply_parent_fid')
+	const replies = await db.raw(`
+		SELECT fid as reply_fid, parent_fid as author_fid, count(1) as count 
+		FROM casts
+		WHERE parent_hash IS NOT NULL
+		GROUP by reply_fid, author_fid
+	`)
+	console.timeEnd('replies')
+
+	const maxReplies = replies.rows
+		.reduce((max: number, { count }: {count: number}) =>
+		Math.max(max, count), 0)
+
+	const repliesMap: kvPair = {};
+	for (const { authorFid, replyFid, count } of replies.rows) {
+		repliesMap[replyFid] = repliesMap[replyFid] || {}
+		repliesMap[replyFid][authorFid] = +count
+	}
+
+	attributes.replies.map = repliesMap;
+	attributes.replies.max = maxReplies;
+}
+
+
+/**
+ * Generate mentions data
+*/
+const getMentionsAttributes = async () => {
 	console.time('mentions')
 	// const mentions = await db.raw(`
 	// 	with m as (
@@ -105,46 +196,26 @@ const rep3rec6m8l1enhancedConnections: LocaltrustStrategy = async (): Promise<Lo
 	`)
 	console.timeEnd('mentions')
 
-
 	const maxMentions = mentions.rows
 		.reduce((max: number, { count }: {count: number}) =>
 		Math.max(max, count), 0)
 
-	const mentionsMap: {[k: string]: {[v: string]: number}} = {}
+	const mentionsMap: kvPair = {}
 	for (const { authorFid, mentionFid, count } of mentions.rows) {
 		mentionsMap[authorFid] = mentionsMap[authorFid] || {}
 		mentionsMap[authorFid][mentionFid] = +count
 	}
 
-	/**
-	 * Generate replies data
-	*/
-	console.time('replies')
-	// const replies = await db('casts')
-	// 	.select('author_fid', 'reply_parent_fid', db.raw('count(1) as count'))
-	// 	.whereNotNull('reply_parent_fid')
-	// 	.groupBy('author_fid', 'reply_parent_fid')
-	const replies = await db.raw(`
-		SELECT fid as reply_fid, parent_fid as author_fid, count(1) as count 
-		FROM casts
-		WHERE parent_hash IS NOT NULL
-		GROUP by reply_fid, author_fid
-	`)
-	console.timeEnd('replies')
+	attributes.mentions.map = mentionsMap;
+	attributes.mentions.max = maxMentions;
+}
 
-	const maxReplies = replies.rows
-		.reduce((max: number, { count }: {count: number}) =>
-		Math.max(max, count), 0)
 
-	const repliesMap: {[k: string]: {[v: string]: number}} = {}
-	for (const { authorFid, replyFid, count } of replies.rows) {
-		repliesMap[replyFid] = repliesMap[replyFid] || {}
-		repliesMap[replyFid][authorFid] = +count
-	}
+/**
+ * Generate recasts data
+*/
+const getRecastsAttributes = async () => {
 
-	/**
-	 * Generate recasts data
-	*/
 	console.time('recasts')
 	// const recasts = await db('casts')
 	// 	.select('casts.author_fid as recaster_fid', 'c.author_fid', db.raw('count(1) as count'))
@@ -162,33 +233,104 @@ const rep3rec6m8l1enhancedConnections: LocaltrustStrategy = async (): Promise<Lo
 		.reduce((max: number, { count }: {count: number}) =>
 		Math.max(max, count), 0)
 
-	const recastsMap: {[k: string]: {[v: string]: number}} = {}
+	const recastsMap: kvPair = {}
 	for (const { authorFid, recasterFid, count } of recasts.rows) {
-		recastsMap[recasterFid] = repliesMap[recasterFid] || {}
+		recastsMap[recasterFid] = recastsMap[recasterFid] || {}
 		recastsMap[recasterFid][authorFid] = +count
 	}
+
+	attributes.recasts.map = recastsMap;
+	attributes.recasts.max = maxRecasts;
+}
+
+/**
+ * Generates localtrust by taking into consideration the number of likes between
+ * two users.
+*/
+const enhancedConnections: LocaltrustStrategy = async (): Promise<LocalTrust> => {
+	// const follows = await db('following')
+	const localTrust: LocalTrust = []
+
+	await initializeFollows()
+	await initializeAttributes()
+
+	// const follows = await db.raw(`
+	// 	select 
+	// 		follower_fid, 
+	// 		following_fid
+	// 	from mv_follow_links 
+	// 	order by fid, target_fid, id desc
+	// `)
+
+	// /**
+	//  * Generate likes data
+	// */
+	// console.time('likes')
+	// // const likes = await db('likes')
+	// // 	.select('fid', 'author_fid', db.raw('count(1) as count'))
+	// // 	.innerJoin('casts', 'cast_hash', 'casts.hash')
+	// // 	.groupBy('fid', 'author_fid')
+	// const likes = await db.raw(`
+	// 	select fid, target_fid as author_fid, count(1) as count 
+	// 	from reactions 
+	// 	where reaction_type=1
+	// 	group by fid, author_fid
+	// `)
+	// console.timeEnd('likes')
+
+	// const maxLikes = likes.rows
+	// 	.reduce((max: number, { count }: {count: number}) =>
+	// 	Math.max(max, count), 0)
+
+	// for (const { fid, authorFid, count } of likes.rows) {
+	// 	likesMap[fid] = likesMap[fid] || {}
+	// 	likesMap[fid][authorFid] = +count
+	// }
 	
-	for (const { followerFid, followingFid } of follows.rows) {
-		const likesCount = likesMap[followerFid] && likesMap[followerFid][followingFid] || 0
-		const mentionsCount = mentionsMap[followerFid] && mentionsMap[followerFid][followingFid] || 0
-		const repliesCount = repliesMap[followerFid] && repliesMap[followerFid][followingFid] || 0
-		const recastsCount = recastsMap[followerFid] && recastsMap[followerFid][followingFid] || 0
+	return localTrust
+}
+
+const getCustomLocalTrust = (
+	likesWeight: number,
+	repliesWeight: number,
+	recastsWeight: number,
+	mentionsWeight: number,
+	boostWeight: number
+  ): LocalTrust => {
+	const localTrust: LocalTrust = [];
+  
+	for (const follow of follows) {
+		localTrust.push({
+			i: follow.follower_fid,
+			j: follow.following_fid,
+			v: 1
+		})
+	}
+
+	for (const follow of follows) {
+		const likesCount = attributes.likes.map[follow.follower_fid] && attributes.likes.map[follow.follower_fid][follow.following_fid] || 0
+		const mentionsCount = attributes.mentions.map[follow.follower_fid] && attributes.mentions.map[follow.follower_fid][follow.following_fid] || 0
+		const repliesCount = attributes.replies.map[follow.follower_fid] && attributes.replies.map[follow.follower_fid][follow.following_fid] || 0
+		const recastsCount = attributes.recasts.map[follow.follower_fid] && attributes.recasts.map[follow.follower_fid][follow.following_fid] || 0
 
 		localTrust.push({
-			i: followerFid,
-			j: followingFid,
-			v:  1 * (likesCount / maxLikes) + 
-				3 * (repliesCount / maxReplies) + 
-				6 * (recastsCount / maxRecasts) +
-				8 * (mentionsCount / maxMentions) + 
-				1
+			i: follow.follower_fid,
+			j: follow.following_fid,
+			v:  likesWeight * (likesCount / attributes.likes.max) + 
+				repliesWeight * (repliesCount / attributes.replies.max) + 
+				recastsWeight * (recastsCount / attributes.recasts.max) +
+				mentionsWeight * (mentionsCount / attributes.mentions.max) + 
+				boostWeight
 		})
 	}
 
 	return localTrust
-}
+  }
 
 export const strategies: Record<string, LocaltrustStrategy> = {
 	existingConnections,
-	rep3rec6m8l1enhancedConnections
+	l1rep3rec6m8enhancedConnections,
+	l1rep6rec12m18enhancedConnections,
+	l8rep6rec3m1enhancedConnections,
+	l18rep12rec6m1enhancedConnections,
 }
