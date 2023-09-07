@@ -1,5 +1,6 @@
-import { EthAddress, Follow }  from '../types'
+import { EthAddress, Follow, Strategy }  from '../types'
 import { getDB } from "../utils" 
+import { config } from "../recommender/config"
 
 export const getAllFollows = async (): Promise<Follow[]> => {
 	const db = getDB()
@@ -53,3 +54,26 @@ export function difference<T>(setA: Set<T>, setB: Set<T>): Set<T> {
 	}
 	return _difference
 }
+
+export const getStrategyById = (strategyId: number): Strategy | undefined => {
+	for (const [key, strategy] of config.rankingStrategies) {
+	  if (strategy.strategy_id === strategyId) {
+		return strategy;
+	  }
+	}
+	return undefined;
+  };
+  
+  export const getStrategy = (pretrust: string, localtrust: string, alpha: number): Strategy | undefined => {
+	for (const [key, strategy] of config.rankingStrategies) {
+	  if (strategy.pretrust === pretrust && strategy.localtrust === localtrust && strategy.alpha === alpha) {
+		return strategy;
+	  }
+	}
+	return undefined;
+  };
+
+  export const getAllStrategies = (): Strategy[] => {
+	return Array.from(config.rankingStrategies.values());
+  };
+	

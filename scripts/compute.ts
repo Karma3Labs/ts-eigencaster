@@ -1,14 +1,14 @@
 import Recommender from '../recommender'
-import { generateStrategies } from './utils'
+import { getAllStrategies } from '../recommender/utils'
 
 const main = async () => {
-	const strategies = await generateStrategies()
-	for (const { id, pretrust, localtrust, alpha } of strategies) {
+	const strategies = getAllStrategies()
+	for (const { strategy_id, pretrust, localtrust, alpha } of strategies) {
 		console.log(`Recalculating with [${pretrust},${localtrust},${alpha}]`)
 
 		console.time('recalculation')
 		const recommender = new Recommender()
-		await recommender.recalculate(id)
+		await recommender.recalculate(strategy_id)
 		console.timeEnd('recalculation')
 	}
 }
