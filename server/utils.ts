@@ -2,6 +2,7 @@ import { db, getFidByAddress, getFidByUsername, profileExists  } from "./db"
 import { strategies as pretrustStrategies } from "../recommender/strategies/pretrust"
 import { strategies as localtrustStrategies } from "../recommender/strategies/localtrust"
 import { config } from "../recommender/config"
+import { getStrategyById } from "../recommender/utils"
 
 export const getLocaltrustFromQueryParams = async (query: Record<string, any>) => {
 	if (localtrustStrategies[query.localtrust]) {
@@ -71,7 +72,7 @@ export const getStrategyIdFromQueryParams = async (query: Record<string, any>): 
 		throw Error("Invalid strategy id")
 	}
 
-	const record = await db('strategies').select('id').where('id', query.strategy_id).first()
+	const record = getStrategyById(query.strategy_id)
 	if (!record) {
 		throw new Error('Strategy id does not exist')
 	}

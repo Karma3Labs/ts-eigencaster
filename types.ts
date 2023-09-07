@@ -5,6 +5,7 @@ export type Pretrust = { i: number, v: number }[]
 export type GlobalTrust = { i: number, v: number, username?: string, rank?: number }[]
 export type LocalTrust =  { i: number, j: number, v: number }[]
 export type ExtendedProfile = {  }[]
+export type Strategy = { strategy_id: number; pretrust: string; localtrust: string; alpha: number; };
 export type GlobalRank = { i: number, v: number, username?: string, rank?: number, 
 	following: number, followers: number, 
 	likes: number, replies: number, 

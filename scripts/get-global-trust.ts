@@ -2,6 +2,8 @@ import yargs from 'yargs'
 import path from 'path'
 import fs from 'fs'
 import { db } from '../server/db'
+import { getStrategy } from "../recommender/utils"
+import { Strategy }  from '../types'
 
 const main = async () => {
 	const argv = yargs
@@ -28,9 +30,7 @@ const main = async () => {
 		.help()
 		.argv as { pretrust: string, localtrust: string, alpha: number }
 
-	const strategy = await db('strategies')
-		.where({ pretrust: argv.pretrust, localtrust: argv.localtrust, alpha: argv.alpha })
-		.first('id')
+	const strategy = getStrategy(argv.pretrust, argv.localtrust, argv.alpha)
 	
 	if (!strategy) {
 		console.log("No strategy found for the given parameters.")
@@ -40,7 +40,7 @@ const main = async () => {
 	const globaltrust = await db('globaltrust')
 		.select('fid', 'username', 'v')
 		.innerJoin('profiles', 'profiles.fid', 'globaltrust.i')
-		.where({ strategyId: strategy.id })
+		.where({ strategyId: strategy.strategy_id })
 		.orderBy('v', 'desc')
 
 	if (globaltrust.length === 0) {

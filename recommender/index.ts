@@ -2,10 +2,11 @@ import  path from 'path'
 import axios from "axios"
 import { Profile } from "../types"
 import { Pretrust, LocalTrust, GlobalTrust, GlobalRank, Entry } from '../types'
-import { objectFlip } from "./utils"
+import { objectFlip, getStrategyById } from "./utils"
 import { strategies as ptStrategies } from './strategies/pretrust'
 import { strategies as ltStrategies } from './strategies/localtrust'
 import { db } from '../server/db'
+import { config } from "./config"
 
 // TODO: Fix that ugly thingy
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') })
@@ -19,9 +20,7 @@ export default class Recommender {
 		this.fids = await this.getAllFids()
 		this.fidsToIndex = objectFlip(this.fids)
 
-		const strategy = await db('strategies')
-			.where('id', strategyId)
-			.first()
+		const strategy = getStrategyById(strategyId) || config.rankingStrategies.get(config.defaultRankingStrategy)
 
 		const localtrustStrategy = ltStrategies[strategy.localtrust]
 		const pretrustStrategy = ptStrategies[strategy.pretrust]
