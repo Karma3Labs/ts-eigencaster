@@ -14,7 +14,7 @@ export type GlobalRank = { i: number, v: number, username?: string, rank?: numbe
 export type Entry = [ number, number ]
 export type kvPair =  {[k: string]: {[v: string]: number}} 
 
-export type FollowsLinksRecords = { follower_fid: number, following_fid: number }
+export type FollowsLinksRecords = { follower_fid: number, following_fid: number, id: number }[]
 export type LocaltrustStrategy = () => Promise<LocalTrust>
 export type AttributeMaps = () => Promise<kvPair>;
 

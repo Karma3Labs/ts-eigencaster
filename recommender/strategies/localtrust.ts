@@ -8,10 +8,10 @@ let attributes: AttributesObject = {
 	recasts: { map: {}, max: 0 },
 }
 
-let follows: FollowsLinksRecords[]
+let follows: FollowsLinksRecords
 
 const initializeFollows = async () => {
-	if (follows.length === 0)
+	if (follows === undefined)
 		follows = await getFollows()
 }
 
@@ -26,16 +26,19 @@ const initializeAttributes = async () => {
 		await getRecastsAttributes()
 }
 
-const getFollows = async (): Promise<FollowsLinksRecords[]> => {
-	const follows:FollowsLinksRecords[] = await db.raw(`
+const getFollows = async (): Promise<FollowsLinksRecords> => {
+	const results = await db.raw(`
 	  select 
 		follower_fid, 
-		following_fid
-	  from mv_follow_links 
-	  order by fid, target_fid, id desc
-	`);
-	
-	return follows;
+		following_fid,
+		id
+	  from
+	  	mv_follow_links 
+	  order by
+	  	follower_fid, following_fid, id desc
+	`)
+
+	return results.rows;
   };
   
   
@@ -70,36 +73,28 @@ const existingConnections: LocaltrustStrategy = async (): Promise<LocalTrust> =>
  * Generates localtrust for l1rep3rec6m8enhancedConnections
 */
 const l1rep3rec6m8enhancedConnections: LocaltrustStrategy = async (): Promise<LocalTrust> => {
-	await initializeFollows()
-	await initializeAttributes()
-	return getCustomLocalTrust(1,3,6,8,1)
+	return await getCustomLocalTrust(1,3,6,8,1)
 }
 
 /**
  * Generates localtrust for l1rep6rec12m18enhancedConnections
 */
 const l1rep6rec12m18enhancedConnections: LocaltrustStrategy = async (): Promise<LocalTrust> => {
-	await initializeFollows()
-	await initializeAttributes()
-	return getCustomLocalTrust(1,6,12,18,1)
+	return await getCustomLocalTrust(1,6,12,18,1)
 }
 
 /**
  * Generates localtrust for l8rep6rec3m1enhancedConnections
 */
 const l8rep6rec3m1enhancedConnections: LocaltrustStrategy = async (): Promise<LocalTrust> => {
-	await initializeFollows()
-	await initializeAttributes()
-	return getCustomLocalTrust(8,6,3,1,1)
+	return await getCustomLocalTrust(8,6,3,1,1)
 }
 
 /**
  * Generates localtrust for l18rep12rec6m1enhancedConnections
 */
 const l18rep12rec6m1enhancedConnections: LocaltrustStrategy = async (): Promise<LocalTrust> => {
-	await initializeFollows()
-	await initializeAttributes()
-	return getCustomLocalTrust(18,12,6,1,1)
+	return await getCustomLocalTrust(18,12,6,1,1)
 }
 
 /**
@@ -243,60 +238,19 @@ const getRecastsAttributes = async () => {
 	attributes.recasts.max = maxRecasts;
 }
 
+
 /**
- * Generates localtrust by taking into consideration the number of likes between
- * two users.
+ * We can now cusomize localtrusts in a more scalable way
 */
-const enhancedConnections: LocaltrustStrategy = async (): Promise<LocalTrust> => {
-	// const follows = await db('following')
-	const localTrust: LocalTrust = []
-
-	await initializeFollows()
-	await initializeAttributes()
-
-	// const follows = await db.raw(`
-	// 	select 
-	// 		follower_fid, 
-	// 		following_fid
-	// 	from mv_follow_links 
-	// 	order by fid, target_fid, id desc
-	// `)
-
-	// /**
-	//  * Generate likes data
-	// */
-	// console.time('likes')
-	// // const likes = await db('likes')
-	// // 	.select('fid', 'author_fid', db.raw('count(1) as count'))
-	// // 	.innerJoin('casts', 'cast_hash', 'casts.hash')
-	// // 	.groupBy('fid', 'author_fid')
-	// const likes = await db.raw(`
-	// 	select fid, target_fid as author_fid, count(1) as count 
-	// 	from reactions 
-	// 	where reaction_type=1
-	// 	group by fid, author_fid
-	// `)
-	// console.timeEnd('likes')
-
-	// const maxLikes = likes.rows
-	// 	.reduce((max: number, { count }: {count: number}) =>
-	// 	Math.max(max, count), 0)
-
-	// for (const { fid, authorFid, count } of likes.rows) {
-	// 	likesMap[fid] = likesMap[fid] || {}
-	// 	likesMap[fid][authorFid] = +count
-	// }
-	
-	return localTrust
-}
-
-const getCustomLocalTrust = (
+const getCustomLocalTrust = async (
 	likesWeight: number,
 	repliesWeight: number,
 	recastsWeight: number,
 	mentionsWeight: number,
 	boostWeight: number
-  ): LocalTrust => {
+  ): Promise<LocalTrust> => {
+	await initializeFollows()
+	await initializeAttributes()
 	const localTrust: LocalTrust = [];
   
 	for (const follow of follows) {
