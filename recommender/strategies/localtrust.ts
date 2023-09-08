@@ -8,11 +8,12 @@ let attributes: AttributesObject = {
 	recasts: { map: {}, max: 0 },
 }
 
-let follows: FollowsLinksRecords
+let follows: FollowsLinksRecords = []
 
 const initializeFollows = async () => {
-	if (follows === undefined)
+	if (follows.length === 0) {
 		follows = await getFollows()
+	}
 }
 
 const initializeAttributes = async () => {
@@ -37,9 +38,8 @@ const getFollows = async (): Promise<FollowsLinksRecords> => {
 	  order by
 	  	follower_fid, following_fid, id desc
 	`)
-
 	return results.rows;
-  };
+}
   
   
 /**
@@ -55,8 +55,8 @@ const existingConnections: LocaltrustStrategy = async (): Promise<LocalTrust> =>
 	// 	order by fid, target_fid, id desc
 	// `)
 	await initializeFollows()
-	const localTrust: LocalTrust = []
 
+	const localTrust: LocalTrust = []
 	for (const follow of follows) {
 		localTrust.push({
 			i: follow.follower_fid,
@@ -124,8 +124,8 @@ const getLikesAttributes = async () => {
 		likesMap[fid][authorFid] = +count
 	}
 
-	attributes.replies.map = likesMap;
-	attributes.replies.max = maxLikes;
+	attributes.likes.map = likesMap;
+	attributes.likes.max = maxLikes;
   }
 
 
@@ -251,22 +251,14 @@ const getCustomLocalTrust = async (
   ): Promise<LocalTrust> => {
 	await initializeFollows()
 	await initializeAttributes()
-	const localTrust: LocalTrust = [];
-  
-	for (const follow of follows) {
-		localTrust.push({
-			i: follow.follower_fid,
-			j: follow.following_fid,
-			v: 1
-		})
-	}
 
+	const localTrust: LocalTrust = []
 	for (const follow of follows) {
 		const likesCount = attributes.likes.map[follow.follower_fid] && attributes.likes.map[follow.follower_fid][follow.following_fid] || 0
 		const mentionsCount = attributes.mentions.map[follow.follower_fid] && attributes.mentions.map[follow.follower_fid][follow.following_fid] || 0
 		const repliesCount = attributes.replies.map[follow.follower_fid] && attributes.replies.map[follow.follower_fid][follow.following_fid] || 0
 		const recastsCount = attributes.recasts.map[follow.follower_fid] && attributes.recasts.map[follow.follower_fid][follow.following_fid] || 0
-
+	
 		localTrust.push({
 			i: follow.follower_fid,
 			j: follow.following_fid,
