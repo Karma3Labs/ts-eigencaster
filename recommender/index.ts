@@ -29,19 +29,24 @@ export default class Recommender {
 		const localtrust = await localtrustStrategy()
 		console.timeEnd('localtrust_generation')
 		console.log(`Generated localtrust with ${localtrust.length} entries`)
+		console.log(`Slice of localtrust: ${JSON.stringify(localtrust.slice(0,10))}`)
 
 		console.time('pretrust_generation')
 		const pretrust = await pretrustStrategy()
 		console.timeEnd('pretrust_generation')
-		console.log(`Generated localtrust with ${localtrust.length} entries`)
 		console.log(`Generated pretrust with ${pretrust.length} entries`)
+		console.log(`Slice of pretrust: ${JSON.stringify(pretrust.slice(0,10))}`)
 
 		this.globaltrust = await this.runEigentrust(localtrust, pretrust, strategy.alpha)
-		console.log("Generated globaltrust")
+		console.log(`Generated globaltrust with ${this.globaltrust.length} entries`)
+		console.log(`Slice of globaltrust: ${JSON.stringify(this.globaltrust.slice(0,10))}`)
 
 		await this.saveGlobaltrust(strategyId)
 	}
 
+	/**
+	 * @deprecated No longer used. TODO - delete this.
+	 */
 	async loadFromDB(strategyId: number) {
 		this.fids = await this.getAllFids()
 		this.fidsToIndex = objectFlip(this.fids)
