@@ -72,7 +72,7 @@ export const getStrategyIdFromQueryParams = async (query: Record<string, any>): 
 		throw Error("Invalid strategy id")
 	}
 
-	const record = getStrategyById(query.strategy_id)
+	const record = getStrategyById(+query.strategy_id)
 	if (!record) {
 		throw new Error('Strategy id does not exist')
 	}
