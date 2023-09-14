@@ -16,19 +16,19 @@ export const config = {
 			alpha: 0.5,
 		}], 
 		['engagement', {
-		    strategy_id: 3,
+		  strategy_id: 3,
 			pretrust: 'pretrustAllEqually',
 			localtrust: 'l1rep3rec6m8enhancedConnections',
 			alpha: 0.5
 		}], 
 		['creator', {
-      		strategy_id: 5,
+      strategy_id: 5,
 			pretrust: 'pretrustSpecificUsernames',
 			localtrust: 'existingConnections',
 			alpha: 0.5
 		}], 
 		['active OGs', {
-      		strategy_id: 7,
+      strategy_id: 7,
 			pretrust: 'pretrustSpecificUsernames',
 			localtrust: 'l1rep3rec6m8enhancedConnections',
 			alpha: 0.5
@@ -40,7 +40,7 @@ export const config = {
 			alpha: 0.5,
 		}], 
 		['hyperEngaged', {
-		    strategy_id: 13,
+		  strategy_id: 13,
 			pretrust: 'pretrustAllEqually',
 			localtrust: 'l1rep6rec12m18enhancedConnections',
 			alpha: 0.5
