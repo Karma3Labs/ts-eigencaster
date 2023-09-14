@@ -133,11 +133,11 @@ export default class Recommender {
 			FROM 
 				globaltrust AS gt
 				INNER JOIN user_data AS u ON (u.fid = gt.i and u.type=6)
-				INNER JOIN _followers ON (u.fid = _followers.following_fid)
-				INNER JOIN _following ON (u.fid = _following.follower_fid)
-				INNER JOIN _reactions ON (u.fid = _reactions.author_fid)
-				INNER JOIN _replies ON (u.fid = _replies.author_fid)
-				INNER JOIN _mentions ON (u.fid = _mentions.mention_fid)
+				LEFT JOIN _followers ON (u.fid = _followers.following_fid)
+				LEFT JOIN _following ON (u.fid = _following.follower_fid)
+				LEFT JOIN _reactions ON (u.fid = _reactions.author_fid)
+				LEFT JOIN _replies ON (u.fid = _replies.author_fid)
+				LEFT JOIN _mentions ON (u.fid = _mentions.mention_fid)
 			WHERE strategy_id= :strategyId
 			ORDER BY gt.v DESC
 			OFFSET :offset
