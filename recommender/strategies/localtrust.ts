@@ -13,6 +13,7 @@ let follows: FollowsLinksRecords = []
 const initializeFollows = async () => {
 	if (follows.length === 0) {
 		follows = await getFollows()
+		console.log(`Slice of follows: ${JSON.stringify(follows.slice(0,10))}`)
 	}
 }
 
@@ -57,10 +58,10 @@ const existingConnections: LocaltrustStrategy = async (): Promise<LocalTrust> =>
 	await initializeFollows()
 
 	const localTrust: LocalTrust = []
-	for (const follow of follows) {
+	for (const [index, value] of follows.entries()) {
 		localTrust.push({
-			i: follow.follower_fid,
-			j: follow.following_fid,
+			i: value.followerFid,
+			j: value.followingFid,
 			v: 1
 		})
 	}
@@ -254,14 +255,14 @@ const getCustomLocalTrust = async (
 
 	const localTrust: LocalTrust = []
 	for (const follow of follows) {
-		const likesCount = attributes.likes.map[follow.follower_fid] && attributes.likes.map[follow.follower_fid][follow.following_fid] || 0
-		const mentionsCount = attributes.mentions.map[follow.follower_fid] && attributes.mentions.map[follow.follower_fid][follow.following_fid] || 0
-		const repliesCount = attributes.replies.map[follow.follower_fid] && attributes.replies.map[follow.follower_fid][follow.following_fid] || 0
-		const recastsCount = attributes.recasts.map[follow.follower_fid] && attributes.recasts.map[follow.follower_fid][follow.following_fid] || 0
+		const likesCount = attributes.likes.map[follow.followerFid] && attributes.likes.map[follow.followerFid][follow.followingFid] || 0
+		const mentionsCount = attributes.mentions.map[follow.followerFid] && attributes.mentions.map[follow.followerFid][follow.followingFid] || 0
+		const repliesCount = attributes.replies.map[follow.followerFid] && attributes.replies.map[follow.followerFid][follow.followingFid] || 0
+		const recastsCount = attributes.recasts.map[follow.followerFid] && attributes.recasts.map[follow.followerFid][follow.followingFid] || 0
 	
 		localTrust.push({
-			i: follow.follower_fid,
-			j: follow.following_fid,
+			i: follow.followerFid,
+			j: follow.followingFid,
 			v:  likesWeight * (likesCount / attributes.likes.max) + 
 				repliesWeight * (repliesCount / attributes.replies.max) + 
 				recastsWeight * (recastsCount / attributes.recasts.max) +
