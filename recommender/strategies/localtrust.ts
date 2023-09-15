@@ -263,10 +263,10 @@ const getCustomLocalTrust = async (
 		localTrust.push({
 			i: follow.followerFid,
 			j: follow.followingFid,
-			v:  likesWeight * (likesCount / attributes.likes.max) + 
-				repliesWeight * (repliesCount / attributes.replies.max) + 
-				recastsWeight * (recastsCount / attributes.recasts.max) +
-				mentionsWeight * (mentionsCount / attributes.mentions.max) + 
+			v:  likesWeight * (likesCount) + 
+				repliesWeight * (repliesCount) + 
+				recastsWeight * (recastsCount) +
+				mentionsWeight * (mentionsCount) + 
 				boostWeight
 		})
 	}
