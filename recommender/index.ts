@@ -139,6 +139,7 @@ export default class Recommender {
 				LEFT JOIN _replies ON (u.fid = _replies.author_fid)
 				LEFT JOIN _mentions ON (u.fid = _mentions.mention_fid)
 			WHERE strategy_id= :strategyId
+			AND gt.date = (SELECT max(date) FROM globaltrust WHERE strategy_id= :strategyId )
 			ORDER BY gt.v DESC
 			OFFSET :offset
 			LIMIT :limit
@@ -274,7 +275,7 @@ export default class Recommender {
 			
 			await db('globaltrust')
 				.insert(chunk)
-				.onConflict(['strategy_id', 'i']).merge()
+				.onConflict(['strategy_id', 'date', 'i']).merge()
 		}
 	}
 
