@@ -71,31 +71,17 @@ const existingConnections: LocaltrustStrategy = async (): Promise<LocalTrust> =>
 
 
 /**
- * Generates localtrust for l1rep3rec6m8enhancedConnections
+ * Generates localtrust for l1rep1rec1m1enhancedConnections
 */
-const l1rep3rec6m8enhancedConnections: LocaltrustStrategy = async (): Promise<LocalTrust> => {
-	return await getCustomLocalTrust(1,3,6,8,1)
+const l1rep1rec1m1enhancedConnections: LocaltrustStrategy = async (): Promise<LocalTrust> => {
+	return await getCustomLocalTrust(1,1,1,1,1)
 }
 
 /**
- * Generates localtrust for l1rep6rec12m18enhancedConnections
+ * Generates localtrust for l1rep6rec3m12enhancedConnections
 */
-const l1rep6rec12m18enhancedConnections: LocaltrustStrategy = async (): Promise<LocalTrust> => {
-	return await getCustomLocalTrust(1,6,12,18,1)
-}
-
-/**
- * Generates localtrust for l8rep6rec3m1enhancedConnections
-*/
-const l8rep6rec3m1enhancedConnections: LocaltrustStrategy = async (): Promise<LocalTrust> => {
-	return await getCustomLocalTrust(8,6,3,1,1)
-}
-
-/**
- * Generates localtrust for l18rep12rec6m1enhancedConnections
-*/
-const l18rep12rec6m1enhancedConnections: LocaltrustStrategy = async (): Promise<LocalTrust> => {
-	return await getCustomLocalTrust(18,12,6,1,1)
+const l1rep6rec3m12enhancedConnections: LocaltrustStrategy = async (): Promise<LocalTrust> => {
+	return await getCustomLocalTrust(1,6,3,12,1)
 }
 
 /**
@@ -276,8 +262,6 @@ const getCustomLocalTrust = async (
 
 export const strategies: Record<string, LocaltrustStrategy> = {
 	existingConnections,
-	l1rep3rec6m8enhancedConnections,
-	l1rep6rec12m18enhancedConnections,
-	l8rep6rec3m1enhancedConnections,
-	l18rep12rec6m1enhancedConnections,
+	l1rep1rec1m1enhancedConnections,
+	l1rep6rec3m12enhancedConnections,
 }
