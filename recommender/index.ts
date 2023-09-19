@@ -156,7 +156,8 @@ export default class Recommender {
 	
 	static async getGlobaltrustLength(strategyId: number): Promise<number> {
 		const { count } = await db('globaltrust')
-			.where({ strategyId })
+			.whereRaw(`strategy_id=? 
+								AND date=(SELECT max(date) FROM globaltrust WHERE strategy_id=?)`, [strategyId, strategyId])
 			.count()
 			.first()
 
@@ -291,7 +292,8 @@ export default class Recommender {
 				SELECT i, v, strategy_id, row_number() over (order by v desc) as rank
 				FROM globaltrust AS gt
 				INNER JOIN user_data AS u ON (u.fid = gt.i and u.type=6)
-				WHERE strategy_id=:strategyId
+				WHERE strategy_id=:strategyId 
+				AND date=(SELECT max(date) FROM globaltrust WHERE strategy_id=:strategyId)
 			) 
 			SELECT rank FROM globaltrust_ranks WHERE i=:fid LIMIT 1
 		`, {strategyId, fid})
