@@ -15,6 +15,7 @@ export default class Recommender {
 	public fids: number[] = []
 	public fidsToIndex: Record<number, number> = {}
 	public globaltrust: GlobalTrust = []
+	public localtrust: LocalTrust = []
 
 	async recalculate(strategyId: number) {
 		this.fids = await this.getAllFids()
@@ -26,10 +27,10 @@ export default class Recommender {
 		const pretrustStrategy = ptStrategies[strategy.pretrust]
 
 		console.time('localtrust_generation')
-		const localtrust = await localtrustStrategy()
+		this.localtrust = await localtrustStrategy()
 		console.timeEnd('localtrust_generation')
-		console.log(`Generated localtrust with ${localtrust.length} entries`)
-		console.log(`Slice of localtrust: ${JSON.stringify(localtrust.slice(0,10))}`)
+		console.log(`Generated localtrust with ${this.localtrust.length} entries`)
+		console.log(`Slice of localtrust: ${JSON.stringify(this.localtrust.slice(0,10))}`)
 
 		console.time('pretrust_generation')
 		const pretrust = await pretrustStrategy()
@@ -37,11 +38,12 @@ export default class Recommender {
 		console.log(`Generated pretrust with ${pretrust.length} entries`)
 		console.log(`Slice of pretrust: ${JSON.stringify(pretrust.slice(0,10))}`)
 
-		this.globaltrust = await this.runEigentrust(localtrust, pretrust, strategy.alpha)
+		this.globaltrust = await this.runEigentrust(this.localtrust, pretrust, strategy.alpha)
 		console.log(`Generated globaltrust with ${this.globaltrust.length} entries`)
 		console.log(`Slice of globaltrust: ${JSON.stringify(this.globaltrust.slice(0,10))}`)
 
 		await this.saveGlobaltrust(strategyId)
+		await this.saveLocaltrust(strategyId)
 	}
 
 	/**
@@ -261,11 +263,12 @@ export default class Recommender {
 	}
 
 	private async saveGlobaltrust(strategyId: number) {
-		const CHUNK_SIZE = 1000
+		const CHUNK_SIZE = 10000
 		if (!this.globaltrust.length) {
 			return
 		}
 
+		console.time(`Inserted globaltrust for strategy ${strategyId}`)
 		for (let i = 0; i < this.globaltrust.length; i += CHUNK_SIZE) {
 			const chunk = this.globaltrust
 				.slice(i, i + CHUNK_SIZE)
@@ -278,6 +281,33 @@ export default class Recommender {
 				.insert(chunk)
 				.onConflict(['strategy_id', 'date', 'i']).merge()
 		}
+		console.timeEnd(`Inserted globaltrust for strategy ${strategyId}`)
+	}
+
+	private async saveLocaltrust(strategyId: number) {
+		const CHUNK_SIZE = 10000
+		if (!this.localtrust.length) {
+			return
+		}
+
+		console.time(`Deleted previous localtrust for strategy ${strategyId}`)
+		await db(`localtrust`).where({ strategy_id: strategyId }).del();
+		console.timeEnd(`Deleted previous localtrust for strategy ${strategyId}`)
+
+		console.time(`Inserted localtrust for strategy ${strategyId}`)
+		for (let i = 0; i < this.localtrust.length; i += CHUNK_SIZE) {
+			const chunk = this.localtrust
+				.slice(i, i + CHUNK_SIZE)
+				.map(g => ({
+					strategyId,
+					...g
+				}))
+			
+			await db('localtrust')
+				.insert(chunk)
+				.onConflict(['strategyId', 'i', 'j']).merge()
+		}
+		console.timeEnd(`Inserted localtrust for strategy ${strategyId}`)
 	}
 
 	static async getRankOfUser(strategyId: number, fid: number): Promise<number> {
