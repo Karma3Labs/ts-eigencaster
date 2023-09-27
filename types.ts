@@ -12,7 +12,24 @@ export type GlobalRank = { i: number, v: number, username?: string, rank?: numbe
 	recasts: number, mentions: number 
 }[]
 export type Entry = [ number, number ]
+export type kvPair =  {[k: string]: {[v: string]: number}} 
 
+export type FollowsLinksRecords = { followerFid: number, followingFid: number, id: number }[]
+export type LocaltrustStrategy = () => Promise<LocalTrust>
+export type AttributeMaps = () => Promise<kvPair>;
+
+export type AttributeWithMax = {
+  map: kvPair;
+  max: number;
+}
+
+export type AttributesObject = {
+	likes: AttributeWithMax,
+	mentions: AttributeWithMax,
+	replies: AttributeWithMax,
+	recasts: AttributeWithMax,
+}
+	
 export interface Follow {
 	followerFid: number,
 	followingFid: number,

@@ -17,6 +17,7 @@ const pretrustSpecificUsernames: PretrustStrategy = async () => {
 	const pretrust: Pretrust = []
 
 	// const fids = await db('profiles').select('fid').whereIn('username', pretrustedUsernames)
+	//TODO - use pretrustedUsernames variable in the db query
 	const fids = await db.raw(`
 		select 
 			distinct fid

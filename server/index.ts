@@ -11,6 +11,7 @@ const PORT = process.env.PORT || 8080
 
 export default () => {
 	app.get('/rankings', async (req: Request, res: Response) => {
+		console.log(`Getting rankings for ${JSON.stringify(req.query)}`)
 		const limit = req.query.limit ? +req.query.limit : 50
 		const offset = req.query.offset ? +req.query.offset : 0
 		let strategyId: number
@@ -50,6 +51,7 @@ export default () => {
 	})
 
 	app.get('/rankings_count', async (req: Request, res: Response) => {
+		console.log(`Getting rankings_count for ${JSON.stringify(req.query)}`)
 		let strategyId: number
 
 		try {
@@ -73,6 +75,7 @@ export default () => {
 
 
 	app.get('/ranking_index', async (req: Request, res: Response) => {
+		console.log(`Getting ranking_index for ${JSON.stringify(req.query)}`)
 		let fid: number, strategyId: number
 
 		try {
