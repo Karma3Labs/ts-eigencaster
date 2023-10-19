@@ -46,16 +46,6 @@ export default class Recommender {
 		await this.saveLocaltrust(strategyId)
 	}
 
-	/**
-	 * @deprecated No longer used. TODO - delete this.
-	 */
-	async loadFromDB(strategyId: number) {
-		this.fids = await this.getAllFids()
-		this.fidsToIndex = objectFlip(this.fids)
-		this.globaltrust = await Recommender.getGlobaltrustByStrategyId(strategyId)
-		console.log(`Loaded ${this.globaltrust.length} globaltrust entries from DB`)
-	}
-
 	static async getGlobaltrustByStrategyId(strategyId: number, offset = 0, limit = 100): Promise<GlobalRank> {
 		// const globaltrust = await db('globaltrust')
 		// 	.where({ strategyId })
@@ -242,7 +232,6 @@ export default class Recommender {
 	/**
 	 * Fid to index conversions
 	*/
-
 	private convertLocaltrustToIndeces(localTrust: LocalTrust): LocalTrust {
 		return localTrust.map(({ i, j, v }) => {
 			return {

@@ -8,7 +8,8 @@
     "compute": "yarn build && node dist/scripts/compute.js",
     "migrate": "npx knex migrate:up",
     "serve": "yarn build && node dist/scripts/start-server.js",
-    "global-trust": "yarn build && node dist/scripts/get-global-trust.js"
+    "global-trust": "yarn build && node dist/scripts/get-global-trust.js",
+    "update-config": "yarn build && node dist/scripts/update-config.js"
   },
   "dependencies": {
     "@types/lodash": "^4.14.191",
