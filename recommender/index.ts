@@ -75,15 +75,15 @@ export default class Recommender {
 		),
 		_reactions AS (
 			SELECT
-				target_fid as author_fid, 
-				SUM(CASE WHEN reaction_type = 1 THEN 1 ELSE 0 END) AS likes_count,
-				SUM(CASE WHEN reaction_type = 2 THEN 1 ELSE 0 END) AS recasts_count
+				target_cast_fid as author_fid, 
+				SUM(CASE WHEN type = 1 THEN 1 ELSE 0 END) AS likes_count,
+				SUM(CASE WHEN type = 2 THEN 1 ELSE 0 END) AS recasts_count
 			FROM
 				reactions
 			WHERE
-				reaction_type IN (1,2)
+			type IN (1,2)
 			GROUP BY
-				target_fid
+				target_cast_fid
 		),
 		_replies AS (
 			SELECT
@@ -99,9 +99,8 @@ export default class Recommender {
 		_mentions AS (
 			WITH
 				mention AS (
-					SELECT fid as from_fid, unnest(mentions) as mention_fid 
-					FROM casts 
-					WHERE array_length(mentions, 1) > 0
+					SELECT fid as from_fid, mention.value as mention_fid 
+					FROM casts, json_array_elements_text(casts.mentions) as mention
 				)
 				SELECT
 					mention_fid,
@@ -233,11 +232,12 @@ export default class Recommender {
 	 * Fid to index conversions
 	*/
 	private convertLocaltrustToIndeces(localTrust: LocalTrust): LocalTrust {
-		return localTrust.map(({ i, j, v }) => {
+		return localTrust.map(({ i, j, v, date }) => {
 			return {
 				i: +this.fidsToIndex[i],
 				j: +this.fidsToIndex[j],
-				v
+				v,
+				date
 			}
 		}) 
 	}
@@ -253,6 +253,7 @@ export default class Recommender {
 
 	private async saveGlobaltrust(strategyId: number) {
 		const CHUNK_SIZE = 10000
+		const currentDate = new Date()
 		if (!this.globaltrust.length) {
 			return
 		}
@@ -275,26 +276,27 @@ export default class Recommender {
 
 	private async saveLocaltrust(strategyId: number) {
 		const CHUNK_SIZE = 10000
+		const currentDate = new Date();
 		if (!this.localtrust.length) {
 			return
 		}
 
-		console.time(`Deleted previous localtrust for strategy ${strategyId}`)
-		await db(`localtrust`).where({ strategy_id: strategyId }).del();
-		console.timeEnd(`Deleted previous localtrust for strategy ${strategyId}`)
+		console.time(`Deleted previous localtrust for strategy ${strategyId} on ${currentDate.toISOString().slice(0, 10)}`)
+		await db(`localtrust`).where({ strategy_id: strategyId, date: currentDate }).del();
+		console.timeEnd(`Deleted previous localtrust for strategy ${strategyId} on ${currentDate.toISOString().slice(0, 10)}`)
 
 		console.time(`Inserted localtrust for strategy ${strategyId}`)
 		for (let i = 0; i < this.localtrust.length; i += CHUNK_SIZE) {
 			const chunk = this.localtrust
 				.slice(i, i + CHUNK_SIZE)
 				.map(g => ({
-					strategyId,
+					strategy_id: strategyId,
 					...g
 				}))
 			
 			await db('localtrust')
 				.insert(chunk)
-				.onConflict(['strategyId', 'i', 'j']).merge()
+				.onConflict(['strategyId', 'i', 'j', 'date']).merge()
 		}
 		console.timeEnd(`Inserted localtrust for strategy ${strategyId}`)
 	}
