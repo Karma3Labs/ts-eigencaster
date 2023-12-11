@@ -53,16 +53,18 @@ const existingConnections: LocaltrustStrategy = async (): Promise<LocalTrust> =>
 	// 		follower_fid, 
 	// 		following_fid
 	// 	from mv_follow_links 
-	// 	order by fid, target_fid, id desc
+	// 	order by fid, target_cast_fid, id desc
 	// `)
 	await initializeFollows()
 
 	const localTrust: LocalTrust = []
+	const currentDate = new Date()
 	for (const [index, value] of follows.entries()) {
 		localTrust.push({
 			i: value.followerFid,
 			j: value.followingFid,
-			v: 1
+			v: 1,
+			date: currentDate
 		})
 	}
 
@@ -94,9 +96,9 @@ const getLikesAttributes = async () => {
 	// 	.innerJoin('casts', 'cast_hash', 'casts.hash')
 	// 	.groupBy('fid', 'author_fid')
 	const likes = await db.raw(`
-		select fid, target_fid as author_fid, count(1) as count 
+		select fid, target_cast_fid as author_fid, count(1) as count 
 		from reactions 
-		where reaction_type=1
+		where type=1
 		group by fid, author_fid
 	`)
 	console.timeEnd('likes')
@@ -167,10 +169,9 @@ const getMentionsAttributes = async () => {
 	// `)
 	const mentions = await db.raw(`
 		WITH mention AS (
-			SELECT fid as author_fid, unnest(mentions) as mention_fid 
-			FROM casts 
-			WHERE array_length(mentions, 1) > 0
-			)
+			SELECT fid as author_fid, mention.value as mention_fid 
+			FROM casts, json_array_elements_text(casts.mentions) as mention
+		)
 		SELECT 
 			author_fid, mention_fid, count(1) as count
 		FROM mention
@@ -204,9 +205,9 @@ const getRecastsAttributes = async () => {
 	// 	.innerJoin('casts as c', 'casts.recasted_cast_hash', 'c.hash')
 	// 	.groupBy('recaster_fid', 'c.author_fid')
 	const recasts = await db.raw(`
-		select fid as recaster_fid, target_fid as author_fid, count(1) as count 
+		select fid as recaster_fid, target_cast_fid as author_fid, count(1) as count 
 		from reactions 
-		where reaction_type=2
+		where type=2
 		group by recaster_fid, author_fid
 	`)
 	console.timeEnd('recasts')
@@ -240,6 +241,7 @@ const getCustomLocalTrust = async (
 	await initializeAttributes()
 
 	const localTrust: LocalTrust = []
+	const currentDate = new Date()
 	for (const follow of follows) {
 		const likesCount = attributes.likes.map[follow.followerFid] && attributes.likes.map[follow.followerFid][follow.followingFid] || 0
 		const mentionsCount = attributes.mentions.map[follow.followerFid] && attributes.mentions.map[follow.followerFid][follow.followingFid] || 0
@@ -253,7 +255,8 @@ const getCustomLocalTrust = async (
 				repliesWeight * (repliesCount) + 
 				recastsWeight * (recastsCount) +
 				mentionsWeight * (mentionsCount) + 
-				boostWeight
+				boostWeight,
+			date: currentDate
 		})
 	}
 
