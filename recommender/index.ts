@@ -99,7 +99,7 @@ export default class Recommender {
 		_mentions AS (
 			WITH
 				mention AS (
-					SELECT fid as from_fid, mention.value as mention_fid 
+					SELECT fid as from_fid, cast(mention.value as int8) as mention_fid 
 					FROM casts, json_array_elements_text(casts.mentions) as mention
 				)
 				SELECT
