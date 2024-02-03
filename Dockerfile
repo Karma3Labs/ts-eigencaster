@@ -8,6 +8,7 @@ RUN yarn
 
 # Bundle app source
 COPY . .
+COPY .env.docker .env
 
 RUN yarn build
 
