@@ -7,6 +7,8 @@ import { strategies as ptStrategies } from './strategies/pretrust'
 import { strategies as ltStrategies } from './strategies/localtrust'
 import { db } from '../server/db'
 import { config } from "./config"
+import { getLogger } from '../logger'
+const logger = getLogger("recommender");
 
 // TODO: Fix that ugly thingy
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') })
@@ -29,31 +31,24 @@ export default class Recommender {
 		console.time('localtrust_generation')
 		this.localtrust = await localtrustStrategy()
 		console.timeEnd('localtrust_generation')
-		console.log(`Generated localtrust with ${this.localtrust.length} entries`)
-		console.log(`Slice of localtrust: ${JSON.stringify(this.localtrust.slice(0,10))}`)
+		logger.info(`Generated localtrust with ${this.localtrust.length} entries`)
+		logger.info(`Slice of localtrust: ${JSON.stringify(this.localtrust.slice(0,10))}`)
 
 		console.time('pretrust_generation')
 		const pretrust = await pretrustStrategy()
 		console.timeEnd('pretrust_generation')
-		console.log(`Generated pretrust with ${pretrust.length} entries`)
-		console.log(`Slice of pretrust: ${JSON.stringify(pretrust.slice(0,10))}`)
+		logger.info(`Generated pretrust with ${pretrust.length} entries`)
+		logger.info(`Slice of pretrust: ${JSON.stringify(pretrust.slice(0,10))}`)
 
 		this.globaltrust = await this.runEigentrust(this.localtrust, pretrust, strategy.alpha)
-		console.log(`Generated globaltrust with ${this.globaltrust.length} entries`)
-		console.log(`Slice of globaltrust: ${JSON.stringify(this.globaltrust.slice(0,10))}`)
+		logger.info(`Generated globaltrust with ${this.globaltrust.length} entries`)
+		logger.info(`Slice of globaltrust: ${JSON.stringify(this.globaltrust.slice(0,10))}`)
 
 		await this.saveGlobaltrust(strategyId)
 		await this.saveLocaltrust(strategyId)
 	}
 
 	static async getGlobaltrustByStrategyId(strategyId: number, offset = 0, limit = 100): Promise<GlobalRank> {
-		// const globaltrust = await db('globaltrust')
-		// 	.where({ strategyId })
-		// 	.select('i', 'username', 'v', db.raw('row_number() over (order by v desc) as rank'))
-		// 	.innerJoin('profiles', 'profiles.fid', 'globaltrust.i')
-		// 	.orderBy('v', 'desc')
-		// 	.offset(offset)
-		// 	.limit(limit)
 		const globaltrust = await db.raw(`
 		WITH 
 		_followers AS (
@@ -140,7 +135,7 @@ export default class Recommender {
 			throw new Error(`No globaltrust found in DB for strategy id: ${strategyId}`)
 		}
 
-		console.log(`Number of globaltrust rows: ${globaltrust.rows.length}`)
+		logger.info(`Number of globaltrust rows: ${globaltrust.rows.length}`)
 
 		return globaltrust.rows
 	}

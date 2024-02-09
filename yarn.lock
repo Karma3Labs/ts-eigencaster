@@ -2810,6 +2810,11 @@ ts-node@10.8.1:
     v8-compile-cache-lib "^3.0.1"
     yn "3.1.1"
 
+tslog@^4.9.2:
+  version "4.9.2"
+  resolved "https://registry.yarnpkg.com/tslog/-/tslog-4.9.2.tgz#35de3a073784dfe3849caeaa028010c7a62b7f4a"
+  integrity sha512-wBM+LRJoNl34Bdu8mYEFxpvmOUedpNUwMNQB/NcuPIZKwdDde6xLHUev3bBjXQU7gdurX++X/YE7gLH8eXYsiQ==
+
 tunnel-agent@^0.6.0:
   version "0.6.0"
   resolved "https://registry.npmjs.org/tunnel-agent/-/tunnel-agent-0.6.0.tgz"
