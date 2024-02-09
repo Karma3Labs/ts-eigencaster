@@ -5,6 +5,7 @@ import { getLogger } from '../logger'
 const logger = getLogger("compute");
 
 const main = async () => {
+	console.time('Compute')
 	const strategies = getAllStrategies()
 	for (const { strategy_id, pretrust, localtrust, alpha } of strategies) {
 		logger.info(`Recalculating with [${pretrust},${localtrust},${alpha}]`)
@@ -16,6 +17,7 @@ const main = async () => {
 		logger.info(`Done recalculating with [${pretrust},${localtrust},${alpha}]`)
 
 	}
+	console.timeEnd('Compute')
 }
 
 main().then(() => {
