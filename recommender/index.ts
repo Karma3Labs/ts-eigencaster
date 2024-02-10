@@ -253,6 +253,7 @@ export default class Recommender {
 			return
 		}
 
+		logger.info(`Inserting globaltrust for strategy ${strategyId}`)
 		console.time(`Inserted globaltrust for strategy ${strategyId}`)
 		for (let i = 0; i < this.globaltrust.length; i += CHUNK_SIZE) {
 			const chunk = this.globaltrust
@@ -267,6 +268,8 @@ export default class Recommender {
 				.onConflict(['strategy_id', 'date', 'i']).merge()
 		}
 		console.timeEnd(`Inserted globaltrust for strategy ${strategyId}`)
+		logger.info(`Inserted globaltrust for strategy ${strategyId}`)
+
 	}
 
 	private async saveLocaltrust(strategyId: number) {
@@ -280,6 +283,7 @@ export default class Recommender {
 		await db(`localtrust`).where({ strategy_id: strategyId, date: currentDate }).del();
 		console.timeEnd(`Deleted previous localtrust for strategy ${strategyId} on ${currentDate.toISOString().slice(0, 10)}`)
 
+		logger.info(`Inserting localtrust for strategy ${strategyId}`)
 		console.time(`Inserted localtrust for strategy ${strategyId}`)
 		for (let i = 0; i < this.localtrust.length; i += CHUNK_SIZE) {
 			const chunk = this.localtrust
@@ -294,6 +298,7 @@ export default class Recommender {
 				.onConflict(['strategyId', 'i', 'j', 'date']).merge()
 		}
 		console.timeEnd(`Inserted localtrust for strategy ${strategyId}`)
+		logger.info(`Inserted localtrust for strategy ${strategyId}`)
 	}
 
 	static async getRankOfUser(strategyId: number, fid: number): Promise<number> {
