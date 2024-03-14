@@ -1,13 +1,20 @@
-import  path from 'path'
+import path from 'path'
 import express, { Request, Response } from 'express'
 import Recommender from '../recommender'
 import { getFidFromQueryParams, getStrategyIdFromQueryParams } from './utils'
+import client from 'prom-client';
 
 // TODO: Fix that ugly thingy
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') })
 
 const app = express()
 const PORT = process.env.PORT || 8080
+const register = new client.Registry();
+register.setDefaultLabels({
+	app: 'ts-eigencaster'
+})
+// Enable the collection of default metrics
+client.collectDefaultMetrics({ register })
 
 export default () => {
 	app.get('/rankings', async (req: Request, res: Response) => {
@@ -43,7 +50,7 @@ export default () => {
 			})
 
 			return res.send(profiles)
-		} 
+		}
 		catch (e: any) {
 			console.log(`Error in /rankings for strategyId: ${strategyId}`, e)
 			return res.status(500).send('Could not get rankings')
@@ -96,6 +103,11 @@ export default () => {
 			console.error(`Error in /ranking_index for handle: ${fid} and strategyId: ${strategyId}`, e)
 			res.status(500).send('Could not get ranking index')
 		}
+	})
+
+	app.get('/metrics', async (_, res) => {
+		res.setHeader('Content-Type', register.contentType);
+		res.send(await register.metrics());
 	})
 
 
