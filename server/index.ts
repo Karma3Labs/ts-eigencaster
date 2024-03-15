@@ -2,19 +2,25 @@ import path from 'path'
 import express, { Request, Response } from 'express'
 import Recommender from '../recommender'
 import { getFidFromQueryParams, getStrategyIdFromQueryParams } from './utils'
-import client from 'prom-client';
+const promBundle = require("express-prom-bundle");
 
 // TODO: Fix that ugly thingy
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') })
 
 const app = express()
 const PORT = process.env.PORT || 8080
-const register = new client.Registry();
-register.setDefaultLabels({
-	app: 'ts-eigencaster'
-})
-// Enable the collection of default metrics
-client.collectDefaultMetrics({ register })
+
+// Add the options to the prometheus middleware most option are for http_request_duration_seconds histogram metric
+const metricsMiddleware = promBundle({
+	includeMethod: true,
+	includePath: true,
+	includeStatusCode: true,
+	includeUp: true,
+	customLabels: { project_name: 'ts-eigencaster', project_type: 'test_metrics_labels' },
+});
+
+app.use(metricsMiddleware);
+
 
 export default () => {
 	app.get('/rankings', async (req: Request, res: Response) => {
@@ -104,12 +110,6 @@ export default () => {
 			res.status(500).send('Could not get ranking index')
 		}
 	})
-
-	app.get('/metrics', async (_, res) => {
-		res.setHeader('Content-Type', register.contentType);
-		res.send(await register.metrics());
-	})
-
 
 	app.listen(PORT, () => {
 		console.log(`[SERVER] Server listening on port ${PORT}`)
